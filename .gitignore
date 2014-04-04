@@ -5,6 +5,7 @@
 *.pydevproject
 .project
 .metadata
+.gitignore
 bin/
 tmp/
 *.tmp
