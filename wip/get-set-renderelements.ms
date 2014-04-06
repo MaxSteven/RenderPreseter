@@ -1,26 +1,37 @@
 (
 clearlistener()
-re = maxOps.GetCurRenderElementMgr()
---renderers.current
+rM = maxOps.GetCurRenderElementMgr()
+
+element = #()
 rElement = #()
-rElements = #()
+rElementN = #()
+rElementS = #()
+rElementA = #()
 	
-for i = 0 to re.numrenderelements() do (
-	if (classof (re.GetRenderElement i)) != UndefinedClass do (
-	--	show ( (re.GetRenderElement i))
-	--	if (classof (re.GetRenderElement i)) == mr_Shader_Element do show (re.GetRenderElement i)
-		propNames = getPropNames (re.GetRenderElement i)
-
-		join rElements #( rElement = #( ( classof ( re.GetRenderElement i ) ) ) )
-
-		for p = 1 to propNames.count do (
-			property = getProperty (re.GetRenderElement i) propNames[p]
-			join rElement #( ( property ) )
-			join rElements #( rElement )
-			)
+for i = 0 to rM.numrenderelements() do (
+	if ( classof ( rM.GetRenderElement i ) ) != UndefinedClass do (
+		join rElement #( element = #( rM.GetRenderElement i, rM.GetRenderElementFilename i ) )
 		)
 	)
-print rElements
-)	
+	
+for r = 1 to rElement.count do (
+	rElementN = #()
+	rElementS = #()
+	join rElementS #( rElementN = #( rElement[r][1] ) )
+	join rElementS #( rElementN = #( rElement[r][2] ) )
+	
+	propNames = getPropNames rElement[r][1]
+	
+	for p in propNames where p != #bitmap do (
+		join rElementS #( rElementN = #( p, getProperty rElement[r][1] p ) )
+		)
+	
+	append rElementA rElementS
+	)
 
---re.AddRenderElement ( rElements[1][1] elementName:rElements[1][2] )
+rM.AddRenderElement ( ( classof rElementA[1][1][1] ) elementName:rElementA[1][7][2] )
+--setproperty rElementA[1][1][1] shadowOn false
+
+)
+			
+

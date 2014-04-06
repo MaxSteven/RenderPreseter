@@ -155,7 +155,7 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 			
 			propNames = getPropNames rElement[r][1]
 			
-			for p in propNames where p != #bitmap do (
+			for p in propNames where p != #bitmap AND p != #atmosphereOn do (
 				join rElementS #( rElementN = #( p, getProperty rElement[r][1] p ) )
 				)
 			append rElementA rElementS
@@ -218,20 +218,20 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 					rM.removeallrenderelements()
 						
 					for p = 1 to presetsElement[sL].count do (
-						eName = presetsElement[sL][p][1][1]
+						eName = classof presetsElement[sL][p][1][1]
 						if presetsElement[sL][p][2][1] != undefined do ePath = presetsElement[sL][p][2][1]
 						
 						for r = 1 to presetsElement[sL][p].count do (
+							if presetsElement[sL][p][r][1] == #enabled do eEnabled = presetsElement[sL][p][r][2]
+							if presetsElement[sL][p][r][1] == #filterOn do eFilterOn = presetsElement[sL][p][r][2]
 							if presetsElement[sL][p][r][1] == #elementName do eElementName = presetsElement[sL][p][r][2]
+							if presetsElement[sL][p][r][1] == #shadowOn do if presetsElement[sL][p][r][2] == true then sShadowOn = true else sShadowOn = false
+							if presetsElement[sL][p][r][1] == #multiplier then eMultiplier = presetsElement[sL][p][r][2] else eMultiplier = 1.0
+							if presetsElement[sL][p][r][1] == #label then eLabel = presetsElement[sL][p][r][2] else eLabel = undefined
+							if presetsElement[sL][p][r][1] == #Shader then eShader = presetsElement[sL][p][r][2] else eShader = undefined
 							)
-						rM.AddRenderElement ( ( classof eName ) elementName:eElementName )
-						
-						for s = 3 to presetsElement[sL][p].count do (
-							print presetsElement[sL][p][s]
-							if presetsElement[sL][p][s][1] != #elementName do (
-								try ( setProperty eName presetsElement[sL][p][s][1] presetsElement[sL][p][s][2] ) catch ()
-								)
-							)
+						--print ePath
+						rM.AddRenderElement ( eName enabled:eEnabled filterOn:eFilterOn elementName:eElementName shadowOn:sShadowOn multiplier:eMultiplier label:eLabel Shader:eShader )
 							
 						if ePath != undefined do rM.SetRenderElementFilename (p-1) ePath
 						)
