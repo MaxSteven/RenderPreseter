@@ -23,14 +23,14 @@ for r = 1 to rElement.count do (
 	propNames = getPropNames rElement[r][1]
 	
 	for p in propNames where p != #bitmap do (
-		join rElementS #( rElementN = #( p, getProperty rElement[r][1] p ) )
+		join rElementS #( rElementN = #( p , getProperty rElement[r][1] p ) )
 		)
 	
 	append rElementA rElementS
 	)
-
-rM.AddRenderElement ( ( classof rElementA[1][1][1] ) elementName:rElementA[1][7][2] )
---setproperty rElementA[1][1][1] shadowOn false
+print rElementA
+--rM.AddRenderElement ( ( classof rElementA[1][1][1] ) elementName:(rElementA[1][7][2] as name) )
+setproperty rElementA[1][1][1] #shadowOn false
 
 )
 			

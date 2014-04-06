@@ -28,8 +28,9 @@
 :: History --------------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------------------------
 ::
-:: This is version 0.2. Last bigger modification was on 2014-04-04
-:: 2014-04-24: build the script
+:: This is version 0.4. Last bigger modification was on 2014-04-04
+:: 2014-04-04: build the script
+:: 2014-04-06: add render elements to the preset list. maybe the first working version
 ::
 ----------------------------------------------------------------------------------------------------------------------
 
@@ -213,8 +214,7 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 					for i = 2 to presetsEngine[sL].count do (
 						try ( setProperty renderers.current presetsEngine[sL][i][1] presetsEngine[sL][i][2] ) catch ()
 						)
-						
-					--for d = 0 to rM.numrenderelements() do rM.SetRenderElementFilename d ""
+
 					rM.removeallrenderelements()
 						
 					for p = 1 to presetsElement[sL].count do (
@@ -226,20 +226,25 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 							)
 						rM.AddRenderElement ( ( classof eName ) elementName:eElementName )
 						
-						for s = 3 to presetsElement[sL][p].count do (
-							print presetsElement[sL][p][s]
-							if presetsElement[sL][p][s][1] != #elementName do (
-								try ( setProperty eName presetsElement[sL][p][s][1] presetsElement[sL][p][s][2] ) catch ()
-								)
-							)
-							
 						if ePath != undefined do rM.SetRenderElementFilename (p-1) ePath
 						)
-
+					
+					for r = 0 to rM.numRenderElements() do (
+						if ( classof ( rM.GetRenderElement r ) ) != UndefinedClass do (
+							re = rM.getRenderElement r
+							
+							for t = 3 to presetsElement[sL][r+1].count do (
+								if presetsElement[sL][r+1][t][1] != #elementName AND presetsElement[sL][r+1][t][2] != undefined do (
+									setProperty re presetsElement[sL][r+1][t][1] presetsElement[sL][r+1][t][2]
+									) 
+								) 
+							)
+						)
+					
 					if rendDiag == "open" do (
 						renderSceneDialog.commit()
 						renderSceneDialog.open()
-						)	
+						)
 					)
 				)
 		) -- btnRun end
