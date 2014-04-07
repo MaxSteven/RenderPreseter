@@ -110,8 +110,8 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 		if name_values.count > 0 do (
 			ddlPresets.items.addrange name_values
 			ddlPresets.ForeColor = ( dotNetClass "System.Drawing.Color" ).fromARGB ( fgCol.r + 30 ) ( fgCol.g + 30 ) ( fgCol.b + 30 )
-			ddlPresets.SelectedIndex = 0
-			append PreName name_values
+			for nam in name_values do append PreName nam
+			ddlPresets.SelectedIndex = PreName.count - 1
 			)
 			
 		for f = 77777701 to 77777799 do (
@@ -159,7 +159,9 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 		rElementA = #()
 
 		if ddlPresets.text != "Render Preset" AND ddlPresets.text != "" then (
-			append PreName ddlPresets.text
+			
+			join PreName #( ddlPresets.text )
+			
 			ddlPresets.items.addrange PreName
 			ddlPresets.ForeColor = ( dotNetClass "System.Drawing.Color" ).fromARGB ( fgCol.r + 30 ) ( fgCol.g + 30 ) ( fgCol.b + 30 )
 			ddlPresets.SelectedIndex = ddlPresets.items.count - 1
@@ -313,21 +315,31 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 		) -- btnRun end
 
 		on btnDel pressed do (
-			sL = ddlPresets.SelectedIndex + 1
-			ddlPresets.items.clear()
-			deleteItem PreName sL
-			deleteItem presetsFrame sL
-			deleteItem presetsEngine sL
-			deleteItem presetsElement sL
-			
-			ddlPresets.items.addrange PreName
-			if PreName.count == 0 then (
-				ddlPresets.text = "Render Preset"
-				ddlPresets.ForeColor = ( dotNetClass "System.Drawing.Color" ).fromARGB \
-				( if fgCol.r < 50 then 127 else 0 ) ( if fgCol.g < 50 then 127 else 0 ) ( if fgCol.b < 50 then 127 else 0 )
+			if PreName.count > 0 then (
+				sL = ddlPresets.SelectedIndex + 1
+				ddlPresets.items.clear()
+				deleteItem PreName sL
+				--deleteItem presetsFrame sL
+				--deleteItem presetsEngine sL
+				--deleteItem presetsElement sL
+				
+				idN = nodeIDN + sL - 1 
+				idF = nodeIDF + sL - 1
+				idR = nodeIDR + sL - 1
+				idE = nodeIDE + sL - 1
+				
+				deleteAppData rootnode idN
+				deleteAppData rootnode idF
+				deleteAppData rootnode idR
+				deleteAppData rootnode idE
+
+				ddlPresets.items.addrange PreName
+				ddlPresets.SelectedIndex = PreName.count - 1
 				) else (
-					ddlPresets.SelectedIndex = 0
-					)
+					ddlPresets.text = "Render Preset"
+					ddlPresets.ForeColor = ( dotNetClass "System.Drawing.Color" ).fromARGB \
+					( if fgCol.r < 50 then 127 else 0 ) ( if fgCol.g < 50 then 127 else 0 ) ( if fgCol.b < 50 then 127 else 0 )
+						)
 			)
 	) -- rollout end
 
