@@ -74,6 +74,18 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 	local eMultiplier = 1.0
 	local eLabel = ""
 	local eShader = undefined
+	local name_values = #()
+	local frame_values = #()
+	local render_values = #()
+	local element_values = #()
+	local nodeIDN = 66666601
+	local nodeIDF = 77777701
+	local nodeIDR = 88888801
+	local nodeIDE = 99999901
+	local strStreamName = StringStream""
+	local strStreamFrame = StringStream""
+	local strStreamRender = StringStream""
+	local strStreamElement = StringStream""
 		
 	dotnetcontrol ddlPresets "System.Windows.Forms.ComboBox" pos:[2,2] width:100 height:20
 	button btnSet "+" pos:[103,2] width:15 height:20
@@ -81,10 +93,45 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 	button btnDel "x" pos:[133,2] width:15 height:20
 	
 	 on RenderPreseter open do (
+		ddlPresets.items.clear()
 		ddlPresets.text = "Render Preset"
 		ddlPresets.BackColor = ( dotNetClass "System.Drawing.Color" ).fromARGB ( bgCol.r + 20 ) ( bgCol.g + 20 ) ( bgCol.b + 20 )
 		ddlPresets.ForeColor = ( dotNetClass "System.Drawing.Color" ).fromARGB \
 		( if fgCol.r < 50 then 127 else 0 ) ( if fgCol.g < 50 then 127 else 0 ) ( if fgCol.b < 50 then 127 else 0 )
+
+		for n = 66666601 to 66666699 do (
+			if getAppData rootnode n != undefined do (
+				nn = StringStream ( getAppData rootnode n )
+				name_values = #()
+				while not eof nn do append name_values ( readvalue nn )
+				)
+			)
+	
+		if name_values.count > 0 do (
+			ddlPresets.items.addrange name_values
+			ddlPresets.ForeColor = ( dotNetClass "System.Drawing.Color" ).fromARGB ( fgCol.r + 30 ) ( fgCol.g + 30 ) ( fgCol.b + 30 )
+			ddlPresets.SelectedIndex = 0
+			append PreName name_values
+			)
+			
+		for f = 77777701 to 77777799 do (
+			if getAppData rootnode f != undefined do (
+				ff = StringStream ( getAppData rootnode f )
+				frame_values = #()
+				while not eof ff do append frame_values ( readvalue ff )
+				append presetsFrame frame_values
+				)
+			)
+		
+		for r = 88888801 to 88888899 do (
+			if getAppData rootnode r != undefined do (
+				rr = StringStream ( getAppData rootnode r )
+				render_values = #()
+				--while not eof rr do append render_values ( readvalue rr )
+				--append presetsEngine render_values
+				)
+			)
+			for m in presetsEngine do print m
 		)
 
 	on ddlPresets MouseClick arg do (
@@ -111,7 +158,6 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 		rElementS = #()
 		rElementA = #()
 
-		
 		if ddlPresets.text != "Render Preset" AND ddlPresets.text != "" then (
 			append PreName ddlPresets.text
 			ddlPresets.items.addrange PreName
@@ -134,7 +180,7 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 		append presetsFrame renSet
 			
 		-- get rendersettings
-		join setName #( setVal = #( renderers.current ) )
+		join setName #( setVal = #( classof renderers.current ) )
 
 		for rS in propN do (
 			join setName #( setVal = #( rS, getproperty renderers.current rS ) )
@@ -163,7 +209,24 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 			)
 		
 		append presetsElement rElementA
-			
+
+		idN = nodeIDN + ddlPresets.SelectedIndex
+		idF = nodeIDF + ddlPresets.SelectedIndex
+		idR = nodeIDR + ddlPresets.SelectedIndex
+		idE = nodeIDE + ddlPresets.SelectedIndex
+
+		for n in PreName do print n to:strStreamName
+			setAppData rootnode idN strStreamName
+		
+		for f in presetsFrame do print f to:strStreamFrame
+			setAppData rootnode idF strStreamFrame
+		
+		for r in presetsEngine do print r to:strStreamRender
+			setAppData rootnode idR strStreamRender
+		
+		for m in presetsElement do print m to:strStreamElement
+			setAppData rootnode idE strStreamElement
+		
 		if rendDiag == "open" do (
 			renderSceneDialog.commit()
 			renderSceneDialog.open()
