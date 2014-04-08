@@ -215,7 +215,7 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 		
 		append presetsElement rElementA
 
-		idF = nodeIDF + ( PreName.count + 1 )
+		idF = nodeIDF + ( PreName.count )
 		idR = nodeIDR + ddlPresets.SelectedIndex
 		idE = nodeIDE + ddlPresets.SelectedIndex
 		
@@ -326,10 +326,10 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 				--deleteItem presetsEngine sL
 				--deleteItem presetsElement sL
 
-				idF = nodeIDF + sL - 1
-				idR = nodeIDR + sL - 1
-				idE = nodeIDE + sL - 1
-				print idF
+				idF = nodeIDF + sL
+				idR = nodeIDR + sL
+				idE = nodeIDE + sL
+
 				deleteAppData rootnode nodeIDN
 				
 				for n in PreName do print n to:strStreamName
