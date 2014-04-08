@@ -129,12 +129,12 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 				--append presetsEngine render_values
 				)
 			)
-			for m in presetsEngine do print m
+		--	for m in presetsFrame do print m
 			--print ( getAppData rootnode nodeIDN )
-			print PreName
-			print PreName.count
+		--	print PreName
+		--	print PreName.count
 			print presetsFrame
-			print presetsFrame.count
+		--	print presetsFrame.count
 		)
 
 	--on RenderPreseter close do print presetsFrame
@@ -184,8 +184,6 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 			rendSimplifyAreaLights, rendForce2Side, rendSuperBlack, rendSaveFile, rendOutputFilename, rendUseDevice, \
 			rendShowVFB, skipRenderedFrames, usePreRendScript, preRendScript, usePostRendScript, postRendScript )
 
-		append presetsFrame renSet
-			
 		-- get rendersettings
 		join setName #( setVal = #( classof renderers.current ) )
 
@@ -217,14 +215,14 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 		
 		append presetsElement rElementA
 
-		idF = nodeIDF + PreName.count
+		idF = nodeIDF + ( PreName.count + 1 )
 		idR = nodeIDR + ddlPresets.SelectedIndex
 		idE = nodeIDE + ddlPresets.SelectedIndex
 		
 		for n in PreName do print n to:strStreamName
 			setAppData rootnode nodeIDN strStreamName
-		
-		for f in presetsFrame do print f to:strStreamFrame
+
+		for f in renSet do print f to:strStreamFrame
 			setAppData rootnode idF strStreamFrame
 		
 		for r in presetsEngine do print r to:strStreamRender
@@ -284,7 +282,7 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 					--	try ( setProperty renderers.current presetsEngine[sL][i][1] presetsEngine[sL][i][2] ) catch ()
 					--	)
 
-					rM.removeallrenderelements()
+				/*	rM.removeallrenderelements()
 						
 					for p = 1 to presetsElement[sL].count do (
 						eName = presetsElement[sL][p][1][1]
@@ -308,7 +306,7 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 									) 
 								) 
 							)
-						)
+						) */
 					
 					if rendDiag == "open" do (
 						renderSceneDialog.commit()
@@ -328,10 +326,10 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 				--deleteItem presetsEngine sL
 				--deleteItem presetsElement sL
 
-				idF = nodeIDF + sL
-				idR = nodeIDR + sL
-				idE = nodeIDE + sL
-				
+				idF = nodeIDF + sL - 1
+				idR = nodeIDR + sL - 1
+				idE = nodeIDE + sL - 1
+				print idF
 				deleteAppData rootnode nodeIDN
 				
 				for n in PreName do print n to:strStreamName
