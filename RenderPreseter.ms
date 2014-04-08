@@ -91,28 +91,30 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 	button btnRun ">" pos:[118,2] width:15 height:20
 	button btnDel "x" pos:[133,2] width:15 height:20
 	
-	 on RenderPreseter open do (
-		ddlPresets.items.clear()
-		PreName = #()
+	fn comboText = (
 		ddlPresets.text = "Render Preset"
-		ddlPresets.BackColor = ( dotNetClass "System.Drawing.Color" ).fromARGB ( bgCol.r + 20 ) ( bgCol.g + 20 ) ( bgCol.b + 20 )
 		ddlPresets.ForeColor = ( dotNetClass "System.Drawing.Color" ).fromARGB \
 		( if fgCol.r < 50 then 127 else 0 ) ( if fgCol.g < 50 then 127 else 0 ) ( if fgCol.b < 50 then 127 else 0 )
+		)
+	
+	 on RenderPreseter open do (
+		ddlPresets.items.clear()
+		ddlPresets.text = "Render Preset"
+		ddlPresets.BackColor = ( dotNetClass "System.Drawing.Color" ).fromARGB ( bgCol.r + 20 ) ( bgCol.g + 20 ) ( bgCol.b + 20 )
+		comboText()
 
-		if getAppData rootnode nodeIDN != undefined do (
+		if getAppData rootnode nodeIDN != undefined AND getAppData rootnode nodeIDN != "" do (
 			nn = StringStream ( getAppData rootnode nodeIDN )
 			while not eof nn do append PreName ( readvalue nn )
-			)
 			
-		if PreName.count > 0 do (
 			ddlPresets.items.addrange PreName
 			ddlPresets.ForeColor = ( dotNetClass "System.Drawing.Color" ).fromARGB ( fgCol.r + 30 ) ( fgCol.g + 30 ) ( fgCol.b + 30 )
 			ddlPresets.SelectedIndex = PreName.count - 1
 			)
-			
-		for f = 77777701 to 77777799 do (
-			if getAppData rootnode f != undefined do (
-				ff = StringStream ( getAppData rootnode f )
+		
+		for r = 77777701 to 77777799 do (	
+			if getAppData rootnode r != undefined do (
+				ff = StringStream ( getAppData rootnode r )
 				frame_values = #()
 				while not eof ff do append frame_values ( readvalue ff )
 				append presetsFrame frame_values
@@ -128,8 +130,15 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 				)
 			)
 			for m in presetsEngine do print m
+			--print ( getAppData rootnode nodeIDN )
+			print PreName
+			print PreName.count
+			print presetsFrame
+			print presetsFrame.count
 		)
 
+	--on RenderPreseter close do print presetsFrame
+		
 	on ddlPresets MouseClick arg do (
 		ddlPresets.text = ""
 		ddlPresets.ForeColor = ( dotNetClass "System.Drawing.Color" ).fromARGB ( fgCol.r + 30 ) ( fgCol.g + 30 ) ( fgCol.b + 30 )
@@ -137,18 +146,16 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 		
 	on ddlPresets lostFocus arg do (
 		if ddlPresets.text == "" AND PreName.count == 0 then ( 
-			ddlPresets.text = "Render Preset"
-			ddlPresets.ForeColor = ( dotNetClass "System.Drawing.Color" ).fromARGB \
-			( if fgCol.r < 50 then 127 else 0 ) ( if fgCol.g < 50 then 127 else 0 ) ( if fgCol.b < 50 then 127 else 0 )
-			) else if PreName.count > 0 AND ddlPresets.SelectedIndex == -1 then (
-				ddlPresets.text = "Render Preset"
-				ddlPresets.ForeColor = ( dotNetClass "System.Drawing.Color" ).fromARGB \
-				( if fgCol.r < 50 then 127 else 0 ) ( if fgCol.g < 50 then 127 else 0 ) ( if fgCol.b < 50 then 127 else 0 )
+			comboText()
+			) else if PreName.count > 0 AND ddlPresets.SelectedIndex == -1 AND ddlPresets.text == "" then (
+				comboText()
 				)
 		)
 		
 	on btnSet pressed do (
 		ddlPresets.items.clear()
+		strStreamName = StringStream""
+		strStreamFrame = StringStream""
 		propN = GetPropNames renderers.current
 		setVal = #()
 		setName = #()
@@ -159,9 +166,7 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 		rElementA = #()
 
 		if ddlPresets.text != "Render Preset" AND ddlPresets.text != "" then (
-			
-			join PreName #( ddlPresets.text )
-			
+			append PreName ddlPresets.text
 			ddlPresets.items.addrange PreName
 			ddlPresets.ForeColor = ( dotNetClass "System.Drawing.Color" ).fromARGB ( fgCol.r + 30 ) ( fgCol.g + 30 ) ( fgCol.b + 30 )
 			ddlPresets.SelectedIndex = ddlPresets.items.count - 1
@@ -212,10 +217,10 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 		
 		append presetsElement rElementA
 
-		idF = nodeIDF + ddlPresets.SelectedIndex
+		idF = nodeIDF + PreName.count
 		idR = nodeIDR + ddlPresets.SelectedIndex
 		idE = nodeIDE + ddlPresets.SelectedIndex
-
+		
 		for n in PreName do print n to:strStreamName
 			setAppData rootnode nodeIDN strStreamName
 		
@@ -243,7 +248,7 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 					if renderSceneDialog.isOpen() then rendDiag = "open" else rendDiag = "closed"
 					if rendDiag == "open" do renderSceneDialog.close()
 					
-					if renderers.current != presetsEngine[sL][1][1] do renderers.current = presetsEngine[sL][1][1]
+				--	if renderers.current != presetsEngine[sL][1][1] do renderers.current = presetsEngine[sL][1][1]
 						
 					rendTimeType = presetsFrame[sL][1]
 					rendNThFrame = presetsFrame[sL][2]
@@ -275,9 +280,9 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 					usePostRendScript = presetsFrame[sL][28]
 					postRendScript = presetsFrame[sL][29]
 						
-					for i = 2 to presetsEngine[sL].count do (
-						try ( setProperty renderers.current presetsEngine[sL][i][1] presetsEngine[sL][i][2] ) catch ()
-						)
+					--for i = 2 to presetsEngine[sL].count do (
+					--	try ( setProperty renderers.current presetsEngine[sL][i][1] presetsEngine[sL][i][2] ) catch ()
+					--	)
 
 					rM.removeallrenderelements()
 						
@@ -314,31 +319,33 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 		) -- btnRun end
 
 		on btnDel pressed do (
-			if PreName.count > 0 then (
+			if PreName.count > 0 AND ddlPresets.SelectedIndex >= 0 then (
 				sL = ddlPresets.SelectedIndex + 1
 				ddlPresets.items.clear()
+				strStreamName = StringStream""
 				deleteItem PreName sL
-				--deleteItem presetsFrame sL
+				deleteItem presetsFrame sL
 				--deleteItem presetsEngine sL
 				--deleteItem presetsElement sL
+
+				idF = nodeIDF + sL
+				idR = nodeIDR + sL
+				idE = nodeIDE + sL
 				
-				idN = nodeIDN + sL - 1 
-				idF = nodeIDF + sL - 1
-				idR = nodeIDR + sL - 1
-				idE = nodeIDE + sL - 1
+				deleteAppData rootnode nodeIDN
 				
-				deleteAppData rootnode idN
+				for n in PreName do print n to:strStreamName
+					setAppData rootnode nodeIDN strStreamName
+				
 				deleteAppData rootnode idF
 				deleteAppData rootnode idR
 				deleteAppData rootnode idE
 
 				ddlPresets.items.addrange PreName
 				ddlPresets.SelectedIndex = PreName.count - 1
-				) else (
-					ddlPresets.text = "Render Preset"
-					ddlPresets.ForeColor = ( dotNetClass "System.Drawing.Color" ).fromARGB \
-					( if fgCol.r < 50 then 127 else 0 ) ( if fgCol.g < 50 then 127 else 0 ) ( if fgCol.b < 50 then 127 else 0 )
-						)
+				
+				if PreName.count == 0 do comboText()
+				) else ( comboText() )
 			)
 	) -- rollout end
 
