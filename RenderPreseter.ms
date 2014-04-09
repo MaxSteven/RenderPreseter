@@ -53,7 +53,7 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 	local fgCol = ( ( colorman.getColor #text )*255 ) as color
 	local PreName = #()
 	local propN = GetPropNames renderers.current	
-	local setName = #()
+	local engSet = #()
 	local setVal = #()
 	local rendDiag = "closed"
 	local presetsFrame = #()
@@ -71,10 +71,7 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 	local eFilterOn = true
 	local sShadowOn = true
 	local eElementName = ""
-	local eMultiplier = 1.0
-	local eLabel = ""
-	local eShader = undefined
-	local frame_values = #()
+	local matMap = #()
 	local render_values = #()
 	local element_values = #()
 	local nodeIDN = 66666601
@@ -96,6 +93,23 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 		ddlPresets.ForeColor = ( dotNetClass "System.Drawing.Color" ).fromARGB \
 		( if fgCol.r < 50 then 127 else 0 ) ( if fgCol.g < 50 then 127 else 0 ) ( if fgCol.b < 50 then 127 else 0 )
 		)
+			
+	fn replaceChar str = (
+		tStr = ""
+		for i=1 to str.count do (
+			if str[i] == "\\" then tStr += "\\\\"
+			else tStr += str[i] 
+			)
+		tStr
+		)
+		
+	fn GetBitmapOrMaterial place classN = (
+		matMap = #()
+		for m in place do (
+			join matMap ( getClassInstances classN asTrackViewPick:off )
+			)
+			makeUniqueArray matMap
+		)	
 	
 	 on RenderPreseter open do (
 		ddlPresets.items.clear()
@@ -125,15 +139,15 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 			if getAppData rootnode r != undefined do (
 				rr = StringStream ( getAppData rootnode r )
 				render_values = #()
-				--while not eof rr do append render_values ( readvalue rr )
-				--append presetsEngine render_values
+				while not eof rr do append render_values ( readvalue rr )
+				append presetsEngine render_values
 				)
 			)
-		--	for m in presetsFrame do print m
+			for m in presetsEngine do print m
 			--print ( getAppData rootnode nodeIDN )
 		--	print PreName
 		--	print PreName.count
-			print presetsFrame
+		--	print presetsEngine
 		--	print presetsFrame.count
 		)
 
@@ -158,7 +172,7 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 		strStreamFrame = StringStream""
 		propN = GetPropNames renderers.current
 		setVal = #()
-		setName = #()
+		engSet = #()
 		element = #()
 		rElement = #()
 		rElementN = #()
@@ -176,21 +190,39 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 
 		if renderSceneDialog.isOpen() then rendDiag = "open" else rendDiag = "closed"
 		if rendDiag == "open" do renderSceneDialog.close()
-		
+	
 		-- get framesettings
 		renSet = #( rendTimeType, rendNThFrame, rendStart, rendEnd, rendFileNumberBase, rendPickupFrames, \
 			getRenderType(), renderWidth, renderHeight, renderPixelAspect, getRendApertureWidth(), \
 			rendAtmosphere, renderEffects, renderDisplacements, rendColorCheck, rendFieldRender, rendHidden, \
-			rendSimplifyAreaLights, rendForce2Side, rendSuperBlack, rendSaveFile, rendOutputFilename, rendUseDevice, \
+			rendSimplifyAreaLights, rendForce2Side, rendSuperBlack, rendSaveFile, replaceChar rendOutputFilename , rendUseDevice, \
 			rendShowVFB, skipRenderedFrames, usePreRendScript, preRendScript, usePostRendScript, postRendScript )
 
+		append presetsFrame renSet
+			
 		-- get rendersettings
-		join setName #( setVal = #( classof renderers.current ) )
+		join engSet #( setVal = #( classof renderers.current ) )
 
 		for rS in propN do (
-			join setName #( setVal = #( rS, getproperty renderers.current rS ) )
+			prp = getproperty renderers.current rS
+			if rS == #antiAliasFilter then (
+				join engSet #( setVal = #( rS, (filterstring (scanlineRender.antiAliasFilter as string) "():")[1] ) )				
+				) else if superclassof prp == textureMap OR superclassof prp == material then (
+				matMap = ( GetBitmapOrMaterial meditmaterials ( classof prp ) )
+
+				if matMap.count == 0 do (
+					matMap = ( GetBitmapOrMaterial scenematerials ( classof prp ) )
+					) 
+				if matMap.count == 0 then (
+					print "yes"
+					) 
+				print matMap
+				join engSet #( setVal = #( rS, classof prp, prp.name ) )
+				) else (
+					join engSet #( setVal = #( rS, prp ) )
+					)
 			)
-		append presetsEngine setName
+		append presetsEngine engSet
 			
 		-- get renderelements 
 		for i = 0 to rM.numrenderelements() do (
@@ -216,8 +248,8 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 		append presetsElement rElementA
 
 		idF = nodeIDF + ( PreName.count )
-		idR = nodeIDR + ddlPresets.SelectedIndex
-		idE = nodeIDE + ddlPresets.SelectedIndex
+		idR = nodeIDR + ( PreName.count )
+		idE = nodeIDE + ( PreName.count )
 		
 		for n in PreName do print n to:strStreamName
 			setAppData rootnode nodeIDN strStreamName
@@ -242,12 +274,10 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 			messagebox "Please set a preset first!" title:"Render Preseter"
 			) else (
 				sL = ddlPresets.SelectedIndex + 1
-				if ddlPresets.items.count > 0 AND sL > 0 do (
+				if ddlPresets.items.count > 0 AND sL > 0 AND presetsFrame[sL] != undefined do (
 					if renderSceneDialog.isOpen() then rendDiag = "open" else rendDiag = "closed"
 					if rendDiag == "open" do renderSceneDialog.close()
-					
-				--	if renderers.current != presetsEngine[sL][1][1] do renderers.current = presetsEngine[sL][1][1]
-						
+
 					rendTimeType = presetsFrame[sL][1]
 					rendNThFrame = presetsFrame[sL][2]
 					rendStart = presetsFrame[sL][3]
@@ -277,6 +307,8 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 					preRendScript = presetsFrame[sL][27]
 					usePostRendScript = presetsFrame[sL][28]
 					postRendScript = presetsFrame[sL][29]
+						
+				--	if renderers.current != presetsEngine[sL][1][1] do renderers.current = presetsEngine[sL][1][1]
 						
 					--for i = 2 to presetsEngine[sL].count do (
 					--	try ( setProperty renderers.current presetsEngine[sL][i][1] presetsEngine[sL][i][2] ) catch ()
