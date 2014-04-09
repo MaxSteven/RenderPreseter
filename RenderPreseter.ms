@@ -28,9 +28,11 @@
 :: History --------------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------------------------
 ::
-:: This is version 0.4. Last bigger modification was on 2014-04-04
+:: This is version 0.4. Last bigger modification was on 2014-04-08
 :: 2014-04-04: build the script
 :: 2014-04-06: add render elements to the preset list. maybe the first working version
+:: 2014-04-08: add and remove presets to scene rootnode
+:: 2014-04-09: begin to write and read values from renderer
 ::
 ----------------------------------------------------------------------------------------------------------------------
 
@@ -72,6 +74,7 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 	local sShadowOn = true
 	local eElementName = ""
 	local matMap = #()
+	local frame_values = #()
 	local render_values = #()
 	local element_values = #()
 	local nodeIDN = 66666601
