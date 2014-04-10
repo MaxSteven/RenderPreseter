@@ -328,15 +328,157 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 							join engSet #( setVal = #( rS, undefined ) )
 							)
 					)	
-										
+					
+				#ShadowMapFilename: (
+					join engSet #( setVal = #( rS, replaceString prp ) )
+					)	
+				
+				#FinalGatherFilename: (
+					join engSet #( setVal = #( rS, replaceString prp ) )
+					)
+					
+				#FinalGatherTempFilename: (
+					join engSet #( setVal = #( rS, replaceString prp ) )
+					)	
+					
+				#Export_Filename: (
+					join engSet #( setVal = #( rS, replaceString prp ) )
+					)
+
+				#adv_irradmap_loadFileName: (
+					join engSet #( setVal = #( rS, replaceString prp ) )
+					)
+					
+				#adv_irradmap_saveFileName: (
+					if renderers.current.adv_irradmap_saveFileName != undefined then (
+						join engSet #( setVal = #( rS, replaceString prp ) )
+						) else (
+							join engSet #( setVal = #( rS, prp ) )
+							)
+					)
+					
+				#adv_irradmap_autoSaveFileName: (
+					if renderers.current.adv_irradmap_saveFileName != undefined then (
+						join engSet #( setVal = #( rS, replaceString prp ) )
+						) else (
+							join engSet #( setVal = #( rS, prp ) )
+							)
+					)
+					
+				#caustics_loadFileName: (
+					join engSet #( setVal = #( rS, replaceString prp ) )
+					)
+					
+				#caustics_saveFileName: (
+					if renderers.current.adv_irradmap_saveFileName != undefined then (
+						join engSet #( setVal = #( rS, replaceString prp ) )
+						) else (
+							join engSet #( setVal = #( rS, prp ) )
+							)
+					)	
+					
+				#caustics_autoSaveFileName: (
+					if renderers.current.adv_irradmap_saveFileName != undefined then (
+						join engSet #( setVal = #( rS, replaceString prp ) )
+						) else (
+							join engSet #( setVal = #( rS, prp ) )
+							)
+					)
+					
+				#environment_gi_map: (
+					if renderers.current.adv_irradmap_saveFileName != undefined then (
+						join engSet #( setVal = #( rS, replaceString prp ) )
+						) else (
+							join engSet #( setVal = #( rS, prp ) )
+							)
+					)
+					
+				#environment_rr_map: (
+					if renderers.current.adv_irradmap_saveFileName != undefined then (
+						join engSet #( setVal = #( rS, replaceString prp ) )
+						) else (
+							join engSet #( setVal = #( rS, prp ) )
+							)
+					)
+					
+				#environment_refract_map: (
+					if renderers.current.adv_irradmap_saveFileName != undefined then (
+						join engSet #( setVal = #( rS, replaceString prp ) )
+						) else (
+							join engSet #( setVal = #( rS, prp ) )
+							)
+					)	
+				
+				#system_vrayLog_file: (
+					join engSet #( setVal = #( rS, replaceString prp ) )
+					)
+					
+				#photonMap_loadFileName: (
+					join engSet #( setVal = #( rS, replaceString prp ) )
+					)	
+					
+				#photonMap_saveFileName: (
+					if renderers.current.adv_irradmap_saveFileName != undefined then (
+						join engSet #( setVal = #( rS, replaceString prp ) )
+						) else (
+							join engSet #( setVal = #( rS, prp ) )
+							)
+					)
+					
+				#photonMap_autoSaveFileName: (
+					if renderers.current.adv_irradmap_saveFileName != undefined then (
+						join engSet #( setVal = #( rS, replaceString prp ) )
+						) else (
+							join engSet #( setVal = #( rS, prp ) )
+							)
+					)
+				
+				#output_fileName: (
+					join engSet #( setVal = #( rS, replaceString prp ) )
+					)
+					
+				#output_rawFileName: (
+					join engSet #( setVal = #( rS, replaceString prp ) )
+					)
+
+				#output_splitfilename: (
+					join engSet #( setVal = #( rS, replaceString prp ) )
+					)
+					
+				#output_splitbitmap: (
+					if renderers.current.adv_irradmap_saveFileName != undefined then (
+						join engSet #( setVal = #( rS, replaceString prp ) )
+						) else (
+							join engSet #( setVal = #( rS, prp ) )
+							)
+					)
+
+				#lightcache_loadFileName: (
+					join engSet #( setVal = #( rS, replaceString prp ) )
+					)	
+					
+				#lightcache_saveFileName: (
+					if renderers.current.adv_irradmap_saveFileName != undefined then (
+						join engSet #( setVal = #( rS, replaceString prp ) )
+						) else (
+							join engSet #( setVal = #( rS, prp ) )
+							)
+					)
+					
+				#lightcache_autoSaveFileName: (
+					if renderers.current.adv_irradmap_saveFileName != undefined then (
+						join engSet #( setVal = #( rS, replaceString prp ) )
+						) else (
+							join engSet #( setVal = #( rS, prp ) )
+							)
+					)
+					
 				default: (
 					if superclassof prp == textureMap OR superclassof prp == material then (
 						join engSet #( setVal = #( rS, classof prp, prp.name ) )
-						) else if classof prp == string then (
-							join engSet #( setVal = #( rS, replaceString prp ) )
-							) else (						
-								join engSet #( setVal = #( rS, prp ) )
-								)
+						) else (
+							join engSet #( setVal = #( rS, prp ) )
+							)
 					)
 				
 				)
