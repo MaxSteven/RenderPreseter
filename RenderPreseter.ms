@@ -59,6 +59,7 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 	local setVal = #()
 	local rendDiag = "closed"
 	local presetsFrame = #()
+	local presetsEng = #()
 	local presetsEngine = #()
 	local rM = maxOps.GetCurRenderElementMgr()
 	local element = #()
@@ -97,7 +98,7 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 		( if fgCol.r < 50 then 127 else 0 ) ( if fgCol.g < 50 then 127 else 0 ) ( if fgCol.b < 50 then 127 else 0 )
 		)
 			
-	fn replaceChar str = (
+	fn replaceString str = (
 		tStr = ""
 		for i=1 to str.count do (
 			if str[i] == "\\" then tStr += "\\\\"
@@ -129,9 +130,9 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 			ddlPresets.SelectedIndex = PreName.count - 1
 			)
 		
-		for r = 77777701 to 77777799 do (	
-			if getAppData rootnode r != undefined do (
-				ff = StringStream ( getAppData rootnode r )
+		for f = 77777701 to 77777799 do (	
+			if getAppData rootnode f != undefined do (
+				ff = StringStream ( getAppData rootnode f )
 				frame_values = #()
 				while not eof ff do append frame_values ( readvalue ff )
 				append presetsFrame frame_values
@@ -146,15 +147,22 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 				append presetsEngine render_values
 				)
 			)
+			
+		for l = 99999901 to 99999999 do (
+			if getAppData rootnode l != undefined do (
+				ee = StringStream ( getAppData rootnode l )
+				element_values = #()
+				while not eof ee do append element_values ( readvalue ee )
+				append presetsElement element_values
+				)
+			)	
 			for m in presetsEngine do print m
 			--print ( getAppData rootnode nodeIDN )
-		--	print PreName
-		--	print PreName.count
+		--	print presetsEngine
+		--	for i = 1 to presetsEngine.count do print presetsEngine[i][1]
 		--	print presetsEngine
 		--	print presetsFrame.count
 		)
-
-	--on RenderPreseter close do print presetsFrame
 		
 	on ddlPresets MouseClick arg do (
 		ddlPresets.text = ""
@@ -198,8 +206,8 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 		renSet = #( rendTimeType, rendNThFrame, rendStart, rendEnd, rendFileNumberBase, rendPickupFrames, \
 			getRenderType(), renderWidth, renderHeight, renderPixelAspect, getRendApertureWidth(), \
 			rendAtmosphere, renderEffects, renderDisplacements, rendColorCheck, rendFieldRender, rendHidden, \
-			rendSimplifyAreaLights, rendForce2Side, rendSuperBlack, rendSaveFile, replaceChar rendOutputFilename , rendUseDevice, \
-			rendShowVFB, skipRenderedFrames, usePreRendScript, preRendScript, usePostRendScript, postRendScript )
+			rendSimplifyAreaLights, rendForce2Side, rendSuperBlack, rendSaveFile, replaceString rendOutputFilename , rendUseDevice, \
+			rendShowVFB, skipRenderedFrames, usePreRendScript, replaceString preRendScript, usePostRendScript, replaceString postRendScript )
 
 		append presetsFrame renSet
 			
@@ -208,23 +216,275 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 
 		for rS in propN do (
 			prp = getproperty renderers.current rS
-			if rS == #antiAliasFilter then (
-				join engSet #( setVal = #( rS, (filterstring (scanlineRender.antiAliasFilter as string) "():")[1] ) )				
-				) else if superclassof prp == textureMap OR superclassof prp == material then (
-				matMap = ( GetBitmapOrMaterial meditmaterials ( classof prp ) )
-
-				if matMap.count == 0 do (
-					matMap = ( GetBitmapOrMaterial scenematerials ( classof prp ) )
-					) 
-				if matMap.count == 0 then (
-					print "yes"
-					) 
-				print matMap
-				join engSet #( setVal = #( rS, classof prp, prp.name ) )
-				) else (
-					join engSet #( setVal = #( rS, prp ) )
+			
+			case rS of (
+				
+				#antiAliasFilter: (
+					join engSet #( setVal = #( rS, classof prp ) )	
 					)
+					
+				#filter_kernel: (
+					join engSet #( setVal = #( rS, classof prp ) )	
+					)	
+				
+				#EnableContours: (
+					if prp == true do messagebox "You use contours shader, take in mind that this shaders get NOT saved!" title:"Render Preseter"
+					)
+					
+				#Camera_Lens_Shader: (
+					if renderers.current.Enable_Camera_Lens_Shader AND prp != undefined then (
+						matIsInEditor = "n"
+						for mA in meditmaterials do (
+							if mA == prp do matIsInEditor = "y"
+							)
+						
+						if matIsInEditor == "n" do (
+							meditmaterials[19] = prp
+							messagebox "You use a lens shader, this was copy to the material editor slot 19. Please let them there, for a correct work!" title:"Render Preseter"
+							)
+						
+						join engSet #( setVal = #( rS, classof prp, prp.name ) )	
+						matIsInEditor = "n"	
+						) else (
+							join engSet #( setVal = #( rS, undefined ) )
+							)
+					)
+					
+				#Camera_Output_Shader: (
+					if renderers.current.Enable_Camera_Output_Shader == true AND prp != undefined then (
+						matIsInEditor = "n"
+						for mA in meditmaterials do (
+							if mA == prp do matIsInEditor = "y"
+							)
+						
+						if matIsInEditor == "n" do (
+							meditmaterials[20] = prp
+							messagebox "You use a output shader, this was copy to the material editor slot 20. Please let them there, for a correct work!" title:"Render Preseter"
+							)
+						
+						join engSet #( setVal = #( rS, classof prp, prp.name ) )	
+						matIsInEditor = "n"		
+						) else (
+							join engSet #( setVal = #( rS, undefined ) )
+							)
+					)
+				
+				#Camera_Volume_Shader: (
+					if renderers.current.Enable_Camera_Volume_Shader == true AND prp != undefined then (
+						matIsInEditor = "n"
+						
+						for mA in meditmaterials do (
+							if mA == prp do matIsInEditor = "y"
+							)
+						
+						if matIsInEditor == "n" do (						
+							meditmaterials[21] = prp
+							messagebox "You use a volume shader, this was copy to the material editor slot 21. Please let them there, for a correct work!" title:"Render Preseter"
+							)
+						
+						join engSet #( setVal = #( rS, classof prp, prp.name ) )	
+						matIsInEditor = "n"		
+						) else (
+							join engSet #( setVal = #( rS, undefined ) )
+							)
+					)
+
+				#Override_Material: (
+					if renderers.current.Enable_Material_Override == true AND prp != undefined then (
+						matIsInEditor = "n"
+						
+						for mA in meditmaterials do (
+							if mA == prp do matIsInEditor = "y"
+							)
+						
+						if matIsInEditor == "n" do (	
+							meditmaterials[22] = prp
+							messagebox "You use a override material, this was copy to the material editor slot 22. Please let them there, for a correct work!" title:"Render Preseter"
+							)
+							
+						join engSet #( setVal = #( rS, classof prp, prp.name ) )	
+						matIsInEditor = "n"
+						) else (
+							join engSet #( setVal = #( rS, undefined ) )
+							)
+					)
+					
+				#options_overrideMtl_mtl: (
+					if renderers.current.options_overrideMtl_on == true AND prp != undefined then (
+						matIsInEditor = "n"
+						
+						for mA in meditmaterials do (
+							if mA == prp do matIsInEditor = "y"
+							)
+						
+						if matIsInEditor == "n" do (	
+							meditmaterials[23] = prp
+							messagebox "You use a override material, this was copy to the material editor slot 23. Please let them there, for a correct work!" title:"Render Preseter"
+							)
+							
+						join engSet #( setVal = #( rS, classof prp, prp.name ) )	
+						matIsInEditor = "n"
+						) else (
+							join engSet #( setVal = #( rS, undefined ) )
+							)
+					)	
+					
+				#ShadowMapFilename: (
+					join engSet #( setVal = #( rS, replaceString prp ) )
+					)	
+				
+				#FinalGatherFilename: (
+					join engSet #( setVal = #( rS, replaceString prp ) )
+					)
+					
+				#FinalGatherTempFilename: (
+					join engSet #( setVal = #( rS, replaceString prp ) )
+					)	
+					
+				#Export_Filename: (
+					join engSet #( setVal = #( rS, replaceString prp ) )
+					)
+
+				#adv_irradmap_loadFileName: (
+					join engSet #( setVal = #( rS, replaceString prp ) )
+					)
+					
+				#adv_irradmap_saveFileName: (
+					if renderers.current.adv_irradmap_saveFileName != undefined then (
+						join engSet #( setVal = #( rS, replaceString prp ) )
+						) else (
+							join engSet #( setVal = #( rS, prp ) )
+							)
+					)
+					
+				#adv_irradmap_autoSaveFileName: (
+					if renderers.current.adv_irradmap_saveFileName != undefined then (
+						join engSet #( setVal = #( rS, replaceString prp ) )
+						) else (
+							join engSet #( setVal = #( rS, prp ) )
+							)
+					)
+					
+				#caustics_loadFileName: (
+					join engSet #( setVal = #( rS, replaceString prp ) )
+					)
+					
+				#caustics_saveFileName: (
+					if renderers.current.adv_irradmap_saveFileName != undefined then (
+						join engSet #( setVal = #( rS, replaceString prp ) )
+						) else (
+							join engSet #( setVal = #( rS, prp ) )
+							)
+					)	
+					
+				#caustics_autoSaveFileName: (
+					if renderers.current.adv_irradmap_saveFileName != undefined then (
+						join engSet #( setVal = #( rS, replaceString prp ) )
+						) else (
+							join engSet #( setVal = #( rS, prp ) )
+							)
+					)
+					
+				#environment_gi_map: (
+					if renderers.current.adv_irradmap_saveFileName != undefined then (
+						join engSet #( setVal = #( rS, replaceString prp ) )
+						) else (
+							join engSet #( setVal = #( rS, prp ) )
+							)
+					)
+					
+				#environment_rr_map: (
+					if renderers.current.adv_irradmap_saveFileName != undefined then (
+						join engSet #( setVal = #( rS, replaceString prp ) )
+						) else (
+							join engSet #( setVal = #( rS, prp ) )
+							)
+					)
+					
+				#environment_refract_map: (
+					if renderers.current.adv_irradmap_saveFileName != undefined then (
+						join engSet #( setVal = #( rS, replaceString prp ) )
+						) else (
+							join engSet #( setVal = #( rS, prp ) )
+							)
+					)	
+				
+				#system_vrayLog_file: (
+					join engSet #( setVal = #( rS, replaceString prp ) )
+					)
+					
+				#photonMap_loadFileName: (
+					join engSet #( setVal = #( rS, replaceString prp ) )
+					)	
+					
+				#photonMap_saveFileName: (
+					if renderers.current.adv_irradmap_saveFileName != undefined then (
+						join engSet #( setVal = #( rS, replaceString prp ) )
+						) else (
+							join engSet #( setVal = #( rS, prp ) )
+							)
+					)
+					
+				#photonMap_autoSaveFileName: (
+					if renderers.current.adv_irradmap_saveFileName != undefined then (
+						join engSet #( setVal = #( rS, replaceString prp ) )
+						) else (
+							join engSet #( setVal = #( rS, prp ) )
+							)
+					)
+				
+				#output_fileName: (
+					join engSet #( setVal = #( rS, replaceString prp ) )
+					)
+					
+				#output_rawFileName: (
+					join engSet #( setVal = #( rS, replaceString prp ) )
+					)
+
+				#output_splitfilename: (
+					join engSet #( setVal = #( rS, replaceString prp ) )
+					)
+					
+				#output_splitbitmap: (
+					if renderers.current.adv_irradmap_saveFileName != undefined then (
+						join engSet #( setVal = #( rS, replaceString prp ) )
+						) else (
+							join engSet #( setVal = #( rS, prp ) )
+							)
+					)
+
+				#lightcache_loadFileName: (
+					join engSet #( setVal = #( rS, replaceString prp ) )
+					)	
+					
+				#lightcache_saveFileName: (
+					if renderers.current.adv_irradmap_saveFileName != undefined then (
+						join engSet #( setVal = #( rS, replaceString prp ) )
+						) else (
+							join engSet #( setVal = #( rS, prp ) )
+							)
+					)
+					
+				#lightcache_autoSaveFileName: (
+					if renderers.current.adv_irradmap_saveFileName != undefined then (
+						join engSet #( setVal = #( rS, replaceString prp ) )
+						) else (
+							join engSet #( setVal = #( rS, prp ) )
+							)
+					)
+					
+				default: (
+					if superclassof prp == textureMap OR superclassof prp == material then (
+						join engSet #( setVal = #( rS, classof prp, prp.name ) )
+						) else (
+							join engSet #( setVal = #( rS, prp ) )
+							)
+					)
+				
+				)
 			)
+			
+		append presetsEng engSet
 		append presetsEngine engSet
 			
 		-- get renderelements 
@@ -260,7 +520,7 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 		for f in renSet do print f to:strStreamFrame
 			setAppData rootnode idF strStreamFrame
 		
-		for r in presetsEngine do print r to:strStreamRender
+		for r in presetsEng do print r to:strStreamRender
 			setAppData rootnode idR strStreamRender
 		
 		for m in presetsElement do print m to:strStreamElement
@@ -311,11 +571,93 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 					usePostRendScript = presetsFrame[sL][28]
 					postRendScript = presetsFrame[sL][29]
 						
-				--	if renderers.current != presetsEngine[sL][1][1] do renderers.current = presetsEngine[sL][1][1]
+					if classof renderers.current != presetsEngine[sL][1][1] do renderers.current = presetsEngine[sL][1][1] ()
+					
+					cR = renderers.current
 						
-					--for i = 2 to presetsEngine[sL].count do (
-					--	try ( setProperty renderers.current presetsEngine[sL][i][1] presetsEngine[sL][i][2] ) catch ()
-					--	)
+					for i = 2 to presetsEngine[sL].count do (
+						pEV = presetsEngine[sL][i]
+						
+						case pEV[1] of (
+							
+							#antiAliasFilter: (
+								cR.antiAliasFilter = pEV[2] ()
+								)
+							
+							#Camera_Lens_Shader: (
+								if pEV[2] == undefined then (
+									cR.Camera_Lens_Shader = undefined
+									) else (
+										for mA in meditmaterials do (
+											if classof mA == pEV[2] AND mA.name == pEV[3] do (
+												cR.Camera_Lens_Shader = mA
+												)
+											)
+										)
+								)
+								
+							#Camera_Output_Shader: (
+								if pEV[2] == undefined then (
+									cR.Camera_Output_Shader = undefined
+									) else (
+										for mA in meditmaterials do (
+											if classof mA == pEV[2] AND mA.name == pEV[3] do (
+												cR.Camera_Output_Shader = mA
+												)
+											)
+										)
+								)
+								
+							#Camera_Volume_Shader: (
+								if pEV[2] == undefined then (
+									cR.Camera_Volume_Shader = undefined
+									) else ( 
+										for mA in meditmaterials do (
+											if classof mA == pEV[2] AND mA.name == pEV[3] do (
+												cR.Camera_Volume_Shader = mA
+												)
+											)
+										)
+								)
+
+							#Override_Material: (
+								if pEV[2] == undefined then (
+									cR.Override_Material = undefined
+									) else ( 
+										for mA in meditmaterials do (
+											if classof mA == pEV[2] AND mA.name == pEV[3] do (
+												cR.Override_Material = mA
+												)
+											)
+										)
+								)
+								
+							#options_overrideMtl_mtl: (
+								if pEV[2] == undefined then (
+									cR.Override_Material = undefined
+									) else ( 
+										for mA in meditmaterials do (
+											if classof mA == pEV[2] AND mA.name == pEV[3] do (
+												cR.Override_Material = mA
+												)
+											)
+										)
+								)	
+								
+							default: (
+								if pEV[3] != undefined then (
+									print pEV[2]
+									for mA in meditmaterials do (
+										if classof mA == pEV[2] AND mA.name == pEV[3] do (
+											cR.Override_Material = mA
+											)
+										)
+									) else (
+										try ( setProperty cR pEV[1] pEV[2] ) catch ()
+										)
+								)
+							)
+						)
 
 				/*	rM.removeallrenderelements()
 						
@@ -358,7 +700,7 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 				strStreamName = StringStream""
 				deleteItem PreName sL
 				deleteItem presetsFrame sL
-				--deleteItem presetsEngine sL
+				deleteItem presetsEngine sL
 				--deleteItem presetsElement sL
 
 				idF = nodeIDF + sL
