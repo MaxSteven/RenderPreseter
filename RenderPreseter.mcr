@@ -46,9 +46,13 @@
 --
 ----------------------------------------------------------------------------------------------------------------------
 */
+
+macroScript RenderPreseter
+	category:"jb_scripts"
+	ButtonText:"RenderPreseter"
+	Tooltip:"RenderPreseter"
+ 
 (
-clearlistener()
-	
 try ( destroyDialog RenderPreseter ) catch ( )
 	
 rollout RenderPreseter "Render Preseter" width:150 height:25 (
@@ -58,10 +62,8 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 	local PreName = #()
 	local propN = GetPropNames renderers.current	
 	local engSet = #()
-	local envSet = #()
 	local setVal = #()
 	local rendDiag = "closed"
-	local presetsEnv = #()
 	local presetsFrame = #()
 	local presetsEng = #()
 	local presetsEngine = #()
@@ -80,7 +82,6 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 	local sShadowOn = true
 	local eElementName = ""
 	local matMap = #()
-	local env_values = #()
 	local frame_values = #()
 	local render_values = #()
 	local element_values = #()
@@ -90,7 +91,6 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 	local nodeIDRen = 88888801
 	local nodeIDEle = 99999901
 	local strStreamName = StringStream""
-	local strStreamEnv = StringStream""
 	local strStreamFrame = StringStream""
 	local strStreamRender = StringStream""
 	local strStreamElement = StringStream""
@@ -140,15 +140,6 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 			ddlPresets.SelectedIndex = PreName.count - 1
 			)
 		
-		for v = 66666601 to 66666699 do (	
-			if getAppData rootnode v != undefined do (
-				vv = StringStream ( getAppData rootnode v )
-				env_values = #()
-				while not eof ff do append env_values ( readvalue vv )
-				append presetsEnv env_values
-				)
-			)
-			
 		for f = 77777701 to 77777799 do (	
 			if getAppData rootnode f != undefined do (
 				ff = StringStream ( getAppData rootnode f )
@@ -156,7 +147,7 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 				while not eof ff do append frame_values ( readvalue ff )
 				append presetsFrame frame_values
 				)
-			)	
+			)
 		
 		for r = 88888801 to 88888899 do (
 			if getAppData rootnode r != undefined do (
@@ -193,14 +184,12 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 	on btnSet pressed do (
 		ddlPresets.items.clear()
 		strStreamName = StringStream""
-		strStreamEnv = StringStream""
 		strStreamFrame = StringStream""
 		strStreamRender = StringStream""
 		strStreamElement = StringStream""
 		propN = GetPropNames renderers.current
 		rM = maxOps.GetCurRenderElementMgr()
 		setVal = #()
-		envSet = #()
 		engSet = #()
 		element = #()
 		rElement = #()
@@ -208,12 +197,11 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 		rElementS = #()
 		rElementA = #()
 		
-		-- collect all materials
 		matsInScene = for mIS in scenematerials collect mIS
 		meditMats = for mM in meditmaterials collect mM
+
 		for mA in meditMats do append matsInScene mA
 
-		-- set preset names
 		if ddlPresets.text != "Render Preset" AND ddlPresets.text != "" then (
 			append PreName ddlPresets.text
 			ddlPresets.items.addrange PreName
@@ -223,44 +211,6 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 				messagebox "Please add a preset name first!" title:"Render Preseter"
 				)
 
-		-- save environment settings
-		envSet = #( backgroundColor, backgroundColorController, environmentMap, useEnvironmentMap, lightTintColor, lightLevel, ambientColor )
-				
-		expo = SceneExposureControl.exposureControl
-		if expo != undefined do (
-			expSet = #( classof expo, expo.active, expo.processBG )
-			)
-			
-		if numAtmospherics > 0 do (
-			atmo = #()
-			atmos = #()
-			atmosA = #()
-			atmosS = #()
-			for a = 1 to numAtmospherics do (
-				join atmo #( getAtmospheric a )	
-				)
-
-			for t = 1 to atmo.count do (
-				atmos = #()
-				atS = GetPropNames ( getAtmospheric t )
-				
-				join atmos #( classof atmo[t] )
-
-				for atV in atS do (
-					atmprop = getproperty atmo[t] atV
-					if superclassof atmprop == textureMap then (
-						join atmos #( atmosS = #( atV, classof atmprop, atmprop.name ) )
-						) else if superclassof atmprop == helper OR superclassof atmprop == light then (
-							join atmos #( atmosS = #( atV, classof atmprop, atmprop.name ) )
-						) else if classof atmprop != ArrayParameter then (
-							join atmos #( atmosS = #( atV, atmprop ) )
-							)
-					)
-				append atmosA atmos
-				)	
-			)
-		
-		
 		if renderSceneDialog.isOpen() then rendDiag = "open" else rendDiag = "closed"
 		if rendDiag == "open" do renderSceneDialog.close()
 	
