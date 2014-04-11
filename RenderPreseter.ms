@@ -67,6 +67,7 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 	local rElementN = #()
 	local rElementS = #()
 	local rElementA = #()
+	local presetsEle = #()
 	local presetsElement = #()
 	local eName = ""
 	local ePath = undefined
@@ -155,10 +156,10 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 				while not eof ee do append element_values ( readvalue ee )
 				append presetsElement element_values
 				)
-			)	
-			for m in presetsEngine do print m
+			)
+			for m in presetsElement do print m
 			--print ( getAppData rootnode nodeIDN )
-		--	print presetsEngine
+		--	print presetsElement
 		--	for i = 1 to presetsEngine.count do print presetsEngine[i][1]
 		--	print presetsEngine
 		--	print presetsFrame.count
@@ -355,17 +356,28 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 		for r = 1 to rElement.count do (
 			rElementN = #()
 			rElementS = #()
-			join rElementS #( rElementN = #( rElement[r][1] ) )
-			join rElementS #( rElementN = #( rElement[r][2] ) )
+			join rElementS #( rElementN = #( classof rElement[r][1] ) )
+			
+			if classof rElement[r][2] == string do ( 
+				join rElementS #( rElementN = #( replaceString rElement[r][2] ) )
+				)
 			
 			propNames = getPropNames rElement[r][1]
 			
 			for p in propNames where p != #bitmap do (
-				join rElementS #( rElementN = #( p, getProperty rElement[r][1] p ) )
+				ele = getProperty rElement[r][1] p
+				if superclassof ele == textureMap OR superclassof ele == material then (
+					join rElementS #( rElementN = #( p, classof ele, ele.name ) )
+					) else if classof ele == string then (
+						join rElementS #( rElementN = #( p, replaceString ele ) )
+						) else (
+							join rElementS #( rElementN = #( p, ele ) )
+							)
 				)
 			append rElementA rElementS
 			)
 		
+		append presetsEle rElementA
 		append presetsElement rElementA
 
 		idF = nodeIDF + ( PreName.count )
@@ -381,7 +393,7 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 		for r in presetsEng do print r to:strStreamRender
 			setAppData rootnode idR strStreamRender
 		
-		for m in presetsElement do print m to:strStreamElement
+		for m in presetsEle do print m to:strStreamElement
 			setAppData rootnode idE strStreamElement
 		
 		if rendDiag == "open" do (

@@ -20,6 +20,12 @@ for i = 88888801 to 88888899 do (
 		)
 	)	
 	
+for i = 99999901 to 99999999 do (
+	if getAppData rootnode i != undefined do (
+		deleteAppData rootnode i
+		)
+	)
+	
 print presetsFrame
 )
 --getAppData rootnode 1
