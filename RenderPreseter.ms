@@ -358,9 +358,11 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 			rElementS = #()
 			join rElementS #( rElementN = #( classof rElement[r][1] ) )
 			
-			if classof rElement[r][2] == string do ( 
+			if classof rElement[r][2] == string then (
 				join rElementS #( rElementN = #( replaceString rElement[r][2] ) )
-				)
+				) else (
+					join rElementS #( rElementN = #( rElement[r][2] ) )
+					)
 			
 			propNames = getPropNames rElement[r][1]
 			
