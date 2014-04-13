@@ -2,6 +2,12 @@
 clearlistener()
 presetsFrame = #()
 	
+for i = 55555501 to 55555599 do (
+	if getAppData rootnode i != undefined do (
+		deleteAppData rootnode i
+		)
+	)
+	
 for i = 66666601 to 66666699 do (
 	if getAppData rootnode i != undefined do (
 		deleteAppData rootnode i
