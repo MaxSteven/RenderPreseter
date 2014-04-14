@@ -45,18 +45,21 @@
 --	Author:   Jonathan Baecker (jb_alvardo) www.pixelcrusher.de | blog.pixelcrusher.de
 --
 ----------------------------------------------------------------------------------------------------------------------
+
+TODO:
+
+- preset name to presets
 */
 (
 clearlistener()
 
---note: preset name to preset.
 try ( destroyDialog RenderPreseter ) catch ( )
 	
 rollout RenderPreseter "Render Preseter" width:150 height:25 (
 
 	local bgCol = ( ( colorman.getColor #background )*255 ) as color
 	local fgCol = ( ( colorman.getColor #text )*255 ) as color
-	local PreName = #()
+	local presetsName = #()
 	local engSet = #()
 	local setVal = #()
 	local rendDiag = "closed"
@@ -77,14 +80,15 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 	local sShadowOn = true
 	local eElementName = ""
 	local matMap = #()
+	local name_values = #()
 	local frame_values = #()
 	local render_values = #()
 	local element_values = #()
-	local nodeIDNam = 55555501
-	local nodeIDEnv = 66666601
-	local nodeIDFra = 77777701
-	local nodeIDRen = 88888801
-	local nodeIDEle = 99999901
+	local nodeIDNam = 55555500
+	local nodeIDEnv = 66666600
+	local nodeIDFra = 77777700
+	local nodeIDRen = 88888800
+	local nodeIDEle = 99999900
 	local strStreamName = StringStream""
 	local strStreamFrame = StringStream""
 	local strStreamRender = StringStream""
@@ -120,22 +124,58 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 			makeUniqueArray matMap
 		)	
 	
+	fn setPresets presetsName presetsFrame presetsEngine presetsElement id = (
+		strStreamName = StringStream""
+		strStreamFrame = StringStream""
+		strStreamRender = StringStream""
+		strStreamElement = StringStream""
+
+		idN = nodeIDNam + id
+		idF = nodeIDFra + id
+		idR = nodeIDRen + id
+		idE = nodeIDEle + id
+		
+		print presetsName to:strStreamName
+			setAppData rootnode idN strStreamName
+
+		for f in presetsFrame do print f to:strStreamFrame
+			setAppData rootnode idF strStreamFrame
+		
+		for r in presetsEngine do print r to:strStreamRender
+			setAppData rootnode idR strStreamRender
+		
+		for m in presetsElement do print m to:strStreamElement
+			setAppData rootnode idE strStreamElement
+		
+		if rendDiag == "open" do (
+			renderSceneDialog.commit()
+			renderSceneDialog.open()
+			)
+		) -- setPresets end
+		
 	 on RenderPreseter open do (
 		ddlPresets.items.clear()
 		ddlPresets.text = "Render Preset"
 		ddlPresets.BackColor = ( dotNetClass "System.Drawing.Color" ).fromARGB ( bgCol.r + 20 ) ( bgCol.g + 20 ) ( bgCol.b + 20 )
 		comboText()
 
-		if getAppData rootnode nodeIDNam != undefined AND getAppData rootnode nodeIDNam != "" do (
-			nn = StringStream ( getAppData rootnode nodeIDNam )
-			while not eof nn do append PreName ( readvalue nn )
-			
-			ddlPresets.items.addrange PreName
-			ddlPresets.ForeColor = ( dotNetClass "System.Drawing.Color" ).fromARGB ( fgCol.r + 30 ) ( fgCol.g + 30 ) ( fgCol.b + 30 )
-			ddlPresets.SelectedIndex = PreName.count - 1
+		for n = 55555500 to 55555599 do (	
+			if getAppData rootnode n != undefined do (
+				nn = StringStream ( getAppData rootnode n )
+				name_values = #()
+				while not eof nn do append name_values ( readvalue nn )
+				)
 			)
 		
-		for f = 77777701 to 77777799 do (	
+		if name_values.count > 0 do (
+			for nm in name_values do append presetsName nm
+			
+			ddlPresets.items.addrange presetsName
+			ddlPresets.ForeColor = ( dotNetClass "System.Drawing.Color" ).fromARGB ( fgCol.r + 30 ) ( fgCol.g + 30 ) ( fgCol.b + 30 )
+			ddlPresets.SelectedIndex = presetsName.count - 1
+			)
+	
+		for f = 77777700 to 77777799 do (	
 			if getAppData rootnode f != undefined do (
 				ff = StringStream ( getAppData rootnode f )
 				frame_values = #()
@@ -144,7 +184,7 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 				)
 			)
 		
-		for r = 88888801 to 88888899 do (
+		for r = 88888800 to 88888899 do (
 			if getAppData rootnode r != undefined do (
 				rr = StringStream ( getAppData rootnode r )
 				render_values = #()
@@ -153,7 +193,7 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 				)
 			)
 			
-		for l = 99999901 to 99999999 do (
+		for l = 99999900 to 99999999 do (
 			if getAppData rootnode l != undefined do (
 				ee = StringStream ( getAppData rootnode l )
 				element_values = #()
@@ -161,6 +201,8 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 				append presetsElement element_values
 				)
 			)
+		--for i in presetsEngine do print i
+		print presetsFrame
 		)
 		
 	on ddlPresets MouseClick arg do (
@@ -169,9 +211,9 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 		)
 		
 	on ddlPresets lostFocus arg do (
-		if ddlPresets.text == "" AND PreName.count == 0 then ( 
+		if ddlPresets.text == "" AND presetsName.count == 0 then ( 
 			comboText()
-			) else if PreName.count > 0 AND ddlPresets.SelectedIndex == -1 AND ddlPresets.text == "" then (
+			) else if presetsName.count > 0 AND ddlPresets.SelectedIndex == -1 AND ddlPresets.text == "" then (
 				comboText()
 				)
 		)
@@ -195,13 +237,22 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 		matsInScene = for mIS in scenematerials collect mIS
 		meditMats = for mM in meditmaterials collect mM
 
-		for mA in meditMats do append matsInScene mA
+		for mA in meditMats do appendIfUnique matsInScene mA
 
 		if ddlPresets.text != "Render Preset" AND ddlPresets.text != "" then (
-			append PreName ddlPresets.text
-			ddlPresets.items.addrange PreName
-			ddlPresets.ForeColor = ( dotNetClass "System.Drawing.Color" ).fromARGB ( fgCol.r + 30 ) ( fgCol.g + 30 ) ( fgCol.b + 30 )
-			ddlPresets.SelectedIndex = ddlPresets.items.count - 1
+			
+			if findItem presetsName ddlPresets.text > 0 then (
+				messagebox "Please use a unique name!" title:"Render Preseter"
+				ddlPresets.items.addrange presetsName
+				ddlPresets.ForeColor = ( dotNetClass "System.Drawing.Color" ).fromARGB ( fgCol.r + 30 ) ( fgCol.g + 30 ) ( fgCol.b + 30 )
+				ddlPresets.SelectedIndex = ddlPresets.items.count - 1
+				return false 
+				) else (
+					append presetsName ddlPresets.text
+					ddlPresets.items.addrange presetsName
+					ddlPresets.ForeColor = ( dotNetClass "System.Drawing.Color" ).fromARGB ( fgCol.r + 30 ) ( fgCol.g + 30 ) ( fgCol.b + 30 )
+					ddlPresets.SelectedIndex = ddlPresets.items.count - 1
+					)
 			) else (
 				messagebox "Please add a preset name first!" title:"Render Preseter"
 				)
@@ -210,13 +261,13 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 		if rendDiag == "open" do renderSceneDialog.close()
 	
 		-- get framesettings
-		renSet = #( rendTimeType, rendNThFrame, rendStart, rendEnd, rendFileNumberBase, rendPickupFrames, \
+		presetsFra = #( rendTimeType, rendNThFrame, rendStart, rendEnd, rendFileNumberBase, rendPickupFrames, \
 			getRenderType(), renderWidth, renderHeight, renderPixelAspect, getRendApertureWidth(), \
 			rendAtmosphere, renderEffects, renderDisplacements, rendColorCheck, rendFieldRender, rendHidden, \
 			rendSimplifyAreaLights, rendForce2Side, rendSuperBlack, rendSaveFile, replaceString rendOutputFilename , rendUseDevice, \
 			rendShowVFB, skipRenderedFrames, usePreRendScript, replaceString preRendScript, usePostRendScript, replaceString postRendScript )
 
-		append presetsFrame renSet
+		append presetsFrame presetsFra
 			
 		-- get rendersettings
 		join engSet #( setVal = #( classof renderers.current ) )
@@ -240,17 +291,17 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 					
 				#Camera_Lens_Shader: (
 					if renderers.current.Enable_Camera_Lens_Shader AND prp != undefined then (
-						matIsInEditor = "n"
+						matIsInScene = "n"
 						for mA in matsInScene do (
-							if mA == prp do matIsInEditor = "y"
+							if mA == prp do matIsInScene = "y"
 							)
 						
-						if matIsInEditor == "n" do (
+						if matIsInScene == "n" do (
 							messagebox "You use a lens shader, make sure that you put them in the materials editor before saving a new preset!" title:"Render Preseter"
 							)
 						
 						join engSet #( setVal = #( rS, classof prp, prp.name ) )	
-						matIsInEditor = "n"	
+						matIsInScene = "n"	
 						) else (
 							join engSet #( setVal = #( rS, undefined ) )
 							)
@@ -258,17 +309,17 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 					
 				#Camera_Output_Shader: (
 					if renderers.current.Enable_Camera_Output_Shader == true AND prp != undefined then (
-						matIsInEditor = "n"
+						matIsInScene = "n"
 						for mA in matsInScene do (
-							if mA == prp do matIsInEditor = "y"
+							if mA == prp do matIsInScene = "y"
 							)
 						
-						if matIsInEditor == "n" do (
+						if matIsInScene == "n" do (
 							messagebox "You use a output shader, make sure that you put them in the materials editor before saving a new preset!" title:"Render Preseter"
 							)
 						
 						join engSet #( setVal = #( rS, classof prp, prp.name ) )	
-						matIsInEditor = "n"		
+						matIsInScene = "n"		
 						) else (
 							join engSet #( setVal = #( rS, undefined ) )
 							)
@@ -276,18 +327,18 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 				
 				#Camera_Volume_Shader: (
 					if renderers.current.Enable_Camera_Volume_Shader == true AND prp != undefined then (
-						matIsInEditor = "n"
+						matIsInScene = "n"
 						
 						for mA in matsInScene do (
-							if mA == prp do matIsInEditor = "y"
+							if mA == prp do matIsInScene = "y"
 							)
 						
-						if matIsInEditor == "n" do (
+						if matIsInScene == "n" do (
 							messagebox "You use a volume shader, make sure that you put them in the materials editor before saving a new preset!" title:"Render Preseter"
 							)
 						
 						join engSet #( setVal = #( rS, classof prp, prp.name ) )	
-						matIsInEditor = "n"		
+						matIsInScene = "n"		
 						) else (
 							join engSet #( setVal = #( rS, undefined ) )
 							)
@@ -295,18 +346,18 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 
 				#Override_Material: (
 					if renderers.current.Enable_Material_Override == true AND prp != undefined then (
-						matIsInEditor = "n"
+						matIsInScene = "n"
 						
 						for mA in matsInScene do (
-							if mA == prp do matIsInEditor = "y"
+							if mA == prp do matIsInScene = "y"
 							)
 						
-						if matIsInEditor == "n" do (
+						if matIsInScene == "n" do (
 							messagebox "You use a override material, make sure that you put this in the materials editor before saving a new preset!" title:"Render Preseter"
 							)
 							
 						join engSet #( setVal = #( rS, classof prp, prp.name ) )	
-						matIsInEditor = "n"
+						matIsInScene = "n"
 						) else (
 							join engSet #( setVal = #( rS, undefined ) )
 							)
@@ -314,18 +365,18 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 					
 				#options_overrideMtl_mtl: (
 					if renderers.current.options_overrideMtl_on == true AND prp != undefined then (
-						matIsInEditor = "n"
+						matIsInScene = "n"
 						
 						for mA in matsInScene do (
-							if mA == prp do matIsInEditor = "y"
+							if mA == prp do matIsInScene = "y"
 							)
 						
-						if matIsInEditor == "n" do (
+						if matIsInScene == "n" do (
 							messagebox "You use a override material, make sure that you put this in the materials editor before saving a new preset!" title:"Render Preseter"
 							)
 							
 						join engSet #( setVal = #( rS, classof prp, prp.name ) )	
-						matIsInEditor = "n"
+						matIsInScene = "n"
 						) else (
 							join engSet #( setVal = #( rS, undefined ) )
 							)
@@ -374,17 +425,17 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 			for p in propNames where p != #bitmap do (
 				ele = getProperty rElement[r][1] p
 				if superclassof ele == textureMap OR superclassof ele == material then (
-					matIsInEditor = "n"
+					matIsInScene = "n"
 						
 						for mA in matsInScene do (
-							if mA == ele do matIsInEditor = "y"
+							if mA == ele do matIsInScene = "y"
 							)
 						
-						if matIsInEditor == "n" do (
+						if matIsInScene == "n" do (
 							messagebox ( "You use: \"" + ele as string + "\" in your render elements, make sure that you put them in the materials editor before saving a new preset!" ) title:"Render Preseter"
 							)
 					join rElementS #( rElementN = #( p, classof ele, ele.name ) )
-					matIsInEditor == "n"
+					matIsInScene == "n"
 					) else if classof ele == string then (
 						join rElementS #( rElementN = #( p, replaceString ele ) )
 						) else (
@@ -396,27 +447,9 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 		
 		append presetsEle rElementA
 		append presetsElement rElementA
-
-		idF = nodeIDFra + ( PreName.count )
-		idR = nodeIDRen + ( PreName.count )
-		idE = nodeIDEle + ( PreName.count )
 		
-		for n in PreName do print n to:strStreamName
-			setAppData rootnode nodeIDNam strStreamName
-
-		for f in renSet do print f to:strStreamFrame
-			setAppData rootnode idF strStreamFrame
+		setPresets presetsName presetsFra presetsEng presetsEle presetsName.count
 		
-		for r in presetsEng do print r to:strStreamRender
-			setAppData rootnode idR strStreamRender
-		
-		for m in presetsEle do print m to:strStreamElement
-			setAppData rootnode idE strStreamElement
-		
-		if rendDiag == "open" do (
-			renderSceneDialog.commit()
-			renderSceneDialog.open()
-			)
 		) --bntSet end
 		
 	on btnRun pressed do (
@@ -595,32 +628,30 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 		) -- btnRun end
 
 		on btnDel pressed do (
-			if PreName.count > 0 AND ddlPresets.SelectedIndex >= 0 then (
+			if presetsName.count > 0 AND ddlPresets.SelectedIndex >= 0 then (
 				sL = ddlPresets.SelectedIndex + 1
 				ddlPresets.items.clear()
-				strStreamName = StringStream""
-				deleteItem PreName sL
+								
+				for i = 1 to 99 do (
+					deleteAppData rootnode ( nodeIDNam + i )
+					deleteAppData rootnode ( nodeIDFra + i )
+					deleteAppData rootnode ( nodeIDRen + i )
+					deleteAppData rootnode ( nodeIDEle + i )
+					)
+					
+				deleteItem presetsName sL
 				deleteItem presetsFrame sL
 				deleteItem presetsEngine sL
-				--deleteItem presetsElement sL
+				deleteItem presetsElement sL
 
-				idF = nodeIDFra + sL
-				idR = nodeIDRen + sL
-				idE = nodeIDEle + sL
+				for j = 1 to presetsName.count do (
+					setPresets presetsName[j] presetsFrame[j] presetsEngine[j] presetsElement[j] j
+					)
 
-				deleteAppData rootnode nodeIDNam
+				ddlPresets.items.addrange presetsName
+				ddlPresets.SelectedIndex = presetsName.count - 1
 				
-				for n in PreName do print n to:strStreamName
-					setAppData rootnode nodeIDNam strStreamName
-				
-				deleteAppData rootnode idF
-				deleteAppData rootnode idR
-				deleteAppData rootnode idE
-
-				ddlPresets.items.addrange PreName
-				ddlPresets.SelectedIndex = PreName.count - 1
-				
-				if PreName.count == 0 do comboText()
+				if presetsName.count == 0 do comboText()
 				) else ( comboText() )
 			)
 	) -- rollout end
