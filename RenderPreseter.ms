@@ -261,13 +261,11 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 		if rendDiag == "open" do renderSceneDialog.close()
 	
 		-- get framesettings
-		presetsFra = #( rendTimeType, rendNThFrame, rendStart, rendEnd, rendFileNumberBase, rendPickupFrames, \
+		presetsFrame = #( rendTimeType, rendNThFrame, rendStart, rendEnd, rendFileNumberBase, rendPickupFrames, \
 			getRenderType(), renderWidth, renderHeight, renderPixelAspect, getRendApertureWidth(), \
 			rendAtmosphere, renderEffects, renderDisplacements, rendColorCheck, rendFieldRender, rendHidden, \
 			rendSimplifyAreaLights, rendForce2Side, rendSuperBlack, rendSaveFile, replaceString rendOutputFilename , rendUseDevice, \
 			rendShowVFB, skipRenderedFrames, usePreRendScript, replaceString preRendScript, usePostRendScript, replaceString postRendScript )
-
-		append presetsFrame presetsFra
 			
 		-- get rendersettings
 		join engSet #( setVal = #( classof renderers.current ) )
@@ -398,8 +396,6 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 				
 				)
 			)
-			
-		append presetsEng engSet
 		append presetsEngine engSet
 			
 		-- get renderelements 
@@ -444,11 +440,9 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 				)
 			append rElementA rElementS
 			)
-		
-		append presetsEle rElementA
 		append presetsElement rElementA
 		
-		setPresets presetsName presetsFra presetsEng presetsEle presetsName.count
+		setPresets presetsName presetsFrame presetsEngine presetsElement presetsName.count
 		
 		) --bntSet end
 		
