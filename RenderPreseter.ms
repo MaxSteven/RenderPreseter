@@ -122,8 +122,8 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 			join matMap ( getClassInstances classN asTrackViewPick:off )
 			)
 			makeUniqueArray matMap
-		)	
-	
+		)
+		
 	fn setPresets presetsName presetsFrame presetsEngine presetsElement id = (
 		strStreamName = StringStream""
 		strStreamFrame = StringStream""
@@ -134,39 +134,38 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 		idF = nodeIDFra + id
 		idR = nodeIDRen + id
 		idE = nodeIDEle + id
+
+		presetsEngine = #( presetsEngine )
 		
 		print presetsName to:strStreamName
 			setAppData rootnode idN strStreamName
 
 		for f in presetsFrame do print f to:strStreamFrame
 			setAppData rootnode idF strStreamFrame
-		
+
 		for r in presetsEngine do print r to:strStreamRender
 			setAppData rootnode idR strStreamRender
 		
 		for m in presetsElement do print m to:strStreamElement
 			setAppData rootnode idE strStreamElement
-		
-		if rendDiag == "open" do (
-			renderSceneDialog.commit()
-			renderSceneDialog.open()
-			)
-		) -- setPresets end
+
+		) -- setPresets end	
 		
 	 on RenderPreseter open do (
 		ddlPresets.items.clear()
 		ddlPresets.text = "Render Preset"
 		ddlPresets.BackColor = ( dotNetClass "System.Drawing.Color" ).fromARGB ( bgCol.r + 20 ) ( bgCol.g + 20 ) ( bgCol.b + 20 )
 		comboText()
-
+		name_values = #()
+		
 		for n = 55555500 to 55555599 do (	
 			if getAppData rootnode n != undefined do (
 				nn = StringStream ( getAppData rootnode n )
-				name_values = #()
+
 				while not eof nn do append name_values ( readvalue nn )
 				)
 			)
-		
+			
 		if name_values.count > 0 do (
 			for nm in name_values do append presetsName nm
 			
@@ -183,7 +182,7 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 				append presetsFrame frame_values
 				)
 			)
-		
+			
 		for r = 88888800 to 88888899 do (
 			if getAppData rootnode r != undefined do (
 				rr = StringStream ( getAppData rootnode r )
@@ -200,9 +199,11 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 				while not eof ee do append element_values ( readvalue ee )
 				append presetsElement element_values
 				)
-			)
+			)	
+
 		--for i in presetsEngine do print i
-		print presetsFrame
+		--print presetsName
+		print presetsElement
 		)
 		
 	on ddlPresets MouseClick arg do (
@@ -256,16 +257,18 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 			) else (
 				messagebox "Please add a preset name first!" title:"Render Preseter"
 				)
-
+				
 		if renderSceneDialog.isOpen() then rendDiag = "open" else rendDiag = "closed"
 		if rendDiag == "open" do renderSceneDialog.close()
 	
 		-- get framesettings
-		presetsFrame = #( rendTimeType, rendNThFrame, rendStart, rendEnd, rendFileNumberBase, rendPickupFrames, \
+		presetsFra = #( rendTimeType, rendNThFrame, rendStart, rendEnd, rendFileNumberBase, rendPickupFrames, \
 			getRenderType(), renderWidth, renderHeight, renderPixelAspect, getRendApertureWidth(), \
 			rendAtmosphere, renderEffects, renderDisplacements, rendColorCheck, rendFieldRender, rendHidden, \
 			rendSimplifyAreaLights, rendForce2Side, rendSuperBlack, rendSaveFile, replaceString rendOutputFilename , rendUseDevice, \
 			rendShowVFB, skipRenderedFrames, usePreRendScript, replaceString preRendScript, usePostRendScript, replaceString postRendScript )
+
+		append presetsFrame presetsFra
 			
 		-- get rendersettings
 		join engSet #( setVal = #( classof renderers.current ) )
@@ -441,9 +444,13 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 			append rElementA rElementS
 			)
 		append presetsElement rElementA
-		
-		setPresets presetsName presetsFrame presetsEngine presetsElement presetsName.count
-		
+			
+		setPresets ddlPresets.text presetsFrame engSet rElementA presetsName.count
+			
+		if rendDiag == "open" do (
+			renderSceneDialog.commit()
+			renderSceneDialog.open()
+			)
 		) --bntSet end
 		
 	on btnRun pressed do (
@@ -489,7 +496,7 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 					preRendScript = presetsFrame[sL][27]
 					usePostRendScript = presetsFrame[sL][28]
 					postRendScript = presetsFrame[sL][29]
-						
+
 					if classof renderers.current != presetsEngine[sL][1][1] do renderers.current = presetsEngine[sL][1][1] ()
 					
 					cR = renderers.current
@@ -612,7 +619,7 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 								) 
 							)
 						)
-					
+						
 					if rendDiag == "open" do (
 						renderSceneDialog.commit()
 						renderSceneDialog.open()
