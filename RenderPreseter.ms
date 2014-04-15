@@ -28,7 +28,7 @@
 :: History --------------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------------------------
 ::
-:: This is version 0.4. Last bigger modification was on 2014-04-11
+:: This is version 0.5. Last bigger modification was on 2014-04-11
 :: 2014-04-04: build the script
 :: 2014-04-06: add render elements to the preset list. maybe the first working version
 :: 2014-04-08: add and remove presets to scene rootnode
