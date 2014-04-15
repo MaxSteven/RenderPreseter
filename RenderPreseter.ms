@@ -35,6 +35,7 @@
 :: 2014-04-09: begin to write and read values from renderer
 :: 2014-04-10: renderer presets works
 :: 2014-04-11: first full functional version: saves frame settings, renderer and rendersettings and render elements
+:: 2014-04-15: now add and remove presets works correct, hopefully
 ::
 ----------------------------------------------------------------------------------------------------------------------
 
@@ -48,7 +49,8 @@
 
 TODO:
 
-- preset name to presets
+- preset name to presets - we don't need that
+- add background, effects and atmosphers
 */
 (
 clearlistener()
@@ -136,6 +138,7 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 		idE = nodeIDEle + id
 
 		presetsEngine = #( presetsEngine )
+		presetsElement = #( presetsElement )
 		
 		print presetsName to:strStreamName
 			setAppData rootnode idN strStreamName
@@ -454,6 +457,7 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 		) --bntSet end
 		
 	on btnRun pressed do (
+		rM = maxOps.GetCurRenderElementMgr()
 		matsInScene = for mIS in scenematerials collect mIS
 		meditMats = for mM in meditmaterials collect mM
 
