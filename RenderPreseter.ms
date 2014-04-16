@@ -36,6 +36,7 @@
 :: 2014-04-10: renderer presets works
 :: 2014-04-11: first full functional version: saves frame settings, renderer and rendersettings and render elements
 :: 2014-04-15: now add and remove presets works correct, hopefully
+:: 2014-04-16: next step to environment settings
 ::
 ----------------------------------------------------------------------------------------------------------------------
 
@@ -50,7 +51,8 @@
 TODO:
 
 - preset name to presets - we don't need that
-- add background, effects and atmosphers
+- add background, effects and atmosphers - 50% done
+- better map check
 */
 (
 clearlistener()
@@ -75,6 +77,7 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 	local rElementA = #()
 	local presetsEle = #()
 	local presetsElement = #()
+	local presetsEnvironment = #()
 	local eName = ""
 	local ePath = undefined
 	local eEnabled= true
@@ -86,15 +89,17 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 	local frame_values = #()
 	local render_values = #()
 	local element_values = #()
+	local environment_values = #()
 	local nodeIDNam = 55555500
-	local nodeIDEnv = 66666600
-	local nodeIDFra = 77777700
-	local nodeIDRen = 88888800
-	local nodeIDEle = 99999900
+	local nodeIDFra = 66666600
+	local nodeIDRen = 77777700
+	local nodeIDEle = 88888800
+	local nodeIDEnv = 99999900
 	local strStreamName = StringStream""
 	local strStreamFrame = StringStream""
 	local strStreamRender = StringStream""
 	local strStreamElement = StringStream""
+	local strStreamEnvironment = StringStream""
 	local matsInScene = #()
 	local meditMats = #()
 		
@@ -118,27 +123,31 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 		tStr
 		)
 		
-	fn GetBitmapOrMaterial place classN = (
+	fn GetBitmapOrMaterial matsInScene classN = (
 		matMap = #()
-		for m in place do (
+		for m in matsInScene do (
 			join matMap ( getClassInstances classN asTrackViewPick:off )
 			)
-			makeUniqueArray matMap
+		makeUniqueArray matMap
 		)
 		
-	fn setPresets presetsName presetsFrame presetsEngine presetsElement id = (
+	fn setPresets presetsName presetsFrame presetsEngine presetsElement presetsEnvironment id = (
 		strStreamName = StringStream""
 		strStreamFrame = StringStream""
 		strStreamRender = StringStream""
 		strStreamElement = StringStream""
+		strStreamEnvironment = StringStream""
 
 		idN = nodeIDNam + id
 		idF = nodeIDFra + id
 		idR = nodeIDRen + id
 		idE = nodeIDEle + id
+		idV = nodeIDEnv + id
 
+		presetsFrame = #( presetsFrame )
 		presetsEngine = #( presetsEngine )
 		presetsElement = #( presetsElement )
+		presetsEnvironment = #( presetsEnvironment )
 		
 		print presetsName to:strStreamName
 			setAppData rootnode idN strStreamName
@@ -151,6 +160,9 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 		
 		for m in presetsElement do print m to:strStreamElement
 			setAppData rootnode idE strStreamElement
+		
+		for v in presetsEnvironment do print v to:strStreamEnvironment
+			setAppData rootnode idV strStreamEnvironment
 
 		) -- setPresets end	
 		
@@ -176,7 +188,7 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 			ddlPresets.SelectedIndex = presetsName.count - 1
 			)
 	
-		for f = 77777700 to 77777799 do (	
+		for f = 66666600 to 66666699 do (	
 			if getAppData rootnode f != undefined do (
 				ff = StringStream ( getAppData rootnode f )
 				frame_values = #()
@@ -185,7 +197,7 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 				)
 			)
 			
-		for r = 88888800 to 88888899 do (
+		for r = 77777700 to 77777799 do (
 			if getAppData rootnode r != undefined do (
 				rr = StringStream ( getAppData rootnode r )
 				render_values = #()
@@ -194,18 +206,28 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 				)
 			)
 			
-		for l = 99999900 to 99999999 do (
+		for l = 88888800 to 88888899 do (
 			if getAppData rootnode l != undefined do (
 				ee = StringStream ( getAppData rootnode l )
 				element_values = #()
 				while not eof ee do append element_values ( readvalue ee )
 				append presetsElement element_values
 				)
+			)
+			
+		for v = 99999900 to 99999999 do (
+			if getAppData rootnode v != undefined do (
+				vv = StringStream ( getAppData rootnode v )
+				environment_values = #()
+				while not eof vv do append environment_values ( readvalue vv )
+				append presetsEnvironment environment_values
+				)
 			)	
 
-		--for i in presetsEngine do print i
+		for i in presetsEnvironment do print i
 		--print presetsName
-		print presetsElement
+		--print presetsFrame
+		--print presetsEnvironment
 		)
 		
 	on ddlPresets MouseClick arg do (
@@ -227,6 +249,7 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 		strStreamFrame = StringStream""
 		strStreamRender = StringStream""
 		strStreamElement = StringStream""
+		strStreamEnvironment = StringStream""
 		propN = GetPropNames renderers.current
 		rM = maxOps.GetCurRenderElementMgr()
 		setVal = #()
@@ -236,6 +259,13 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 		rElementN = #()
 		rElementS = #()
 		rElementA = #()
+		atmo = #()
+		atmos = #()
+		atmospherics = #()
+		fx = #()
+		fxS = #()
+		effects = #()
+		presetsEnvironment = #()
 		
 		matsInScene = for mIS in scenematerials collect mIS
 		meditMats = for mM in meditmaterials collect mM
@@ -425,7 +455,7 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 			
 			for p in propNames where p != #bitmap do (
 				ele = getProperty rElement[r][1] p
-				if superclassof ele == textureMap OR superclassof ele == material then (
+				if superclassof ele == material then (
 					matIsInScene = "n"
 						
 						for mA in matsInScene do (
@@ -437,18 +467,71 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 							)
 					join rElementS #( rElementN = #( p, classof ele, ele.name ) )
 					matIsInScene == "n"
-					) else if classof ele == string then (
-						join rElementS #( rElementN = #( p, replaceString ele ) )
-						) else (
-							join rElementS #( rElementN = #( p, ele ) )
-							)
+					) else if superclassof ele == textureMap then (
+						messagebox ( "You use: \"" + ele as string + "\" in your render elements, make sure that you put them in the materials editor before saving a new preset!" ) title:"Render Preseter"
+						join rElementS #( rElementN = #( p, classof ele, ele.name ) )
+						) else if classof ele == string then (
+							join rElementS #( rElementN = #( p, replaceString ele ) )
+							) else (
+								join rElementS #( rElementN = #( p, ele ) )
+								)
 				)
 			append rElementA rElementS
 			)
 		append presetsElement rElementA
 			
-		setPresets ddlPresets.text presetsFrame engSet rElementA presetsName.count
+		-- presetsEnvironment	
+		envSet = #( backgroundColor, useEnvironmentMap, lightTintColor, lightLevel, ambientColor, if environmentMap != undefined then ( classof environmentMap ) else undefined, if environmentMap != undefined do environmentMap.name )
+
+		-- get exposure
+		expo = SceneExposureControl.exposureControl
+		if expo != undefined do (
+			exposS = #()
+			exposure = #()
 			
+			join exposure #( classof expo )
+
+			expS = GetPropNames expo
+			for exS in expS do (
+				exSprop = getproperty expo exS
+				
+				if superclassof exSprop != RenderElement AND exS != #shader_mode AND exS != #gammaOnOff AND exS != #gamma AND exS != #WhitePoint do (
+					join exposure #( exposS = #( exS, exSprop ) )
+					)
+				)
+			)
+
+		-- get atmospherics
+		for a = 1 to numAtmospherics do (
+			join atmo #( getAtmospheric a )	
+			)
+
+		if atmo.count > 0 do 
+			messagebox ( "You use atmospherics in your environment, only the active/deactive state will save. Don't delete the atmosphere!" ) title:"Render Preseter"	
+		
+		for t = 1 to atmo.count do (
+			atmos = #()
+			join atmos #( classof atmo[t], isActive ( getAtmospheric t ) )
+			append atmospherics atmos
+			)
+
+		-- get effects
+		for b in 1 to numeffects do (
+			join fx #( getEffect b )
+			)
+			
+		for x in 1 to fx.count do (
+			fxS = #()
+			join fxS #( classof fx[x], isActive ( getEffect x ) )
+			append effects fxS
+			)
+			
+		-- merge presetsEnvironment and effects
+		envAndFx = #( envSet, exposure, atmospherics, effects )
+		append presetsEnvironment envAndFx	
+			
+		setPresets ddlPresets.text presetsFra engSet rElementA envAndFx presetsName.count
+
 		if rendDiag == "open" do (
 			renderSceneDialog.commit()
 			renderSceneDialog.open()
@@ -607,17 +690,27 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 							
 							for t = 3 to presetsElement[sL][r+1].count do (
 								if presetsElement[sL][r+1][t][1] != #elementName AND presetsElement[sL][r+1][t][2] != undefined do (
-									if superclassof presetsElement[sL][r+1][t][2] == material then (
+									if classof presetsElement[sL][r+1][t][2] == material then (
 										for mA in matsInScene do (
-											if classof mA == presetsElement[sL][r+1][t][2] AND mA.name == presetsElement[sL][r+1][t][3] do (
-												
-										
+											if classof mA == presetsElement[sL][r+1][t][2] AND mA.name == presetsElement[sL][r+1][t][3] then (												
 												setProperty re presetsElement[sL][r+1][t][1] mA
+												) else (
+													messagebox ( presetsElement[sL][r+1][t][3] as string + "\" is not longer in your scene, render element material can not set!" ) title:"Render Preseter"
+													)
+											)
+										) else if classof presetsElement[sL][r+1][t][2] == textureMap then (
+											matMap = ( GetBitmapOrMaterial matsInScene presetsElement[sL][r+1][t][2] )
+											if matMap.count == 0 do messagebox ( presetsElement[sL][r+1][t][3] as string + "\" is not longer in your scene, render element shader can not set!" ) title:"Render Preseter"
+											for mA in matMap do (
+												if mA.name == presetsElement[sL][r+1][t][3] then (
+													setProperty re presetsElement[sL][r+1][t][1] mA
+													) else (
+														messagebox ( presetsElement[sL][r+1][t][3] as string + "\" is not longer in your scene, render element shader can not set!" ) title:"Render Preseter"
+														)
 												)
-											)
-										) else (
-											setProperty re presetsElement[sL][r+1][t][1] presetsElement[sL][r+1][t][2]
-											)
+											) else (
+												setProperty re presetsElement[sL][r+1][t][1] presetsElement[sL][r+1][t][2]
+												)
 									) 
 								) 
 							)
@@ -641,15 +734,17 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 					deleteAppData rootnode ( nodeIDFra + i )
 					deleteAppData rootnode ( nodeIDRen + i )
 					deleteAppData rootnode ( nodeIDEle + i )
+					deleteAppData rootnode ( nodeIDEnv + i )
 					)
 					
 				deleteItem presetsName sL
 				deleteItem presetsFrame sL
 				deleteItem presetsEngine sL
 				deleteItem presetsElement sL
+				deleteItem presetsEnvironment sL
 
 				for j = 1 to presetsName.count do (
-					setPresets presetsName[j] presetsFrame[j] presetsEngine[j] presetsElement[j] j
+					setPresets presetsName[j] presetsFrame[j] presetsEngine[j] presetsElement[j] presetsEnvironment[j] j
 					)
 
 				ddlPresets.items.addrange presetsName
