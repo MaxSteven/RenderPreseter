@@ -164,7 +164,6 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 		for n = 55555500 to 55555599 do (	
 			if getAppData rootnode n != undefined do (
 				nn = StringStream ( getAppData rootnode n )
-
 				while not eof nn do append name_values ( readvalue nn )
 				)
 			)
