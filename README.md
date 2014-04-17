@@ -38,14 +38,13 @@ Features:
  - save exposure settings
  - save atmospherics*
  - save effects*
- 
  - save all settings to the scene, after close and loading the scene all settings getting back
  
  
-Limitations:
+* Limitations:
  - Materials, maps and shader can only be restored when they are in the scene. For example in the material editor or applied to an object.
  - Atmospherics only save the name and the active or de-active state. Don't delete the atmosphere if you need it later, only de-activate it.
- - With the effects is the same like the Atmospherics
+ - With the effects is the same like the Atmospherics.
 
 
 For using it, go in 3Ds Max under MaxScript: Run Script... and select the script file. 
