@@ -28,7 +28,7 @@
 :: History --------------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------------------------
 ::
-:: This is version 0.5. Last bigger modification was on 2014-04-11
+:: This is version 0.6. Last bigger modification was on 2014-04-17
 :: 2014-04-04: build the script
 :: 2014-04-06: add render elements to the preset list. maybe the first working version
 :: 2014-04-08: add and remove presets to scene rootnode
@@ -37,6 +37,7 @@
 :: 2014-04-11: first full functional version: saves frame settings, renderer and rendersettings and render elements
 :: 2014-04-15: now add and remove presets works correct, hopefully
 :: 2014-04-16: next step to environment settings
+:: 2014-04-17: presets works now also for environment settings
 ::
 ----------------------------------------------------------------------------------------------------------------------
 
@@ -44,15 +45,17 @@
 --
 --  Script Name: Search Materials And Maps
 --
---	Author:   Jonathan Baecker (jb_alvardo) www.pixelcrusher.de | blog.pixelcrusher.de
+--	Author:   Jonathan Baecker (jb_alvardo) www.animations-and-more.com | www.pixelcrusher.de | blog.pixelcrusher.de
 --
 ----------------------------------------------------------------------------------------------------------------------
 
 TODO:
 
-- preset name to presets - we don't need that
-- add background, effects and atmosphers - 50% done
+- add background, effects and atmosphers - done
 - better map check
+- check if environment or other shader are already in the right slot
+- load script in toolbar
+
 */
 (
 clearlistener()
@@ -222,14 +225,9 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 				while not eof vv do append environment_values ( readvalue vv )
 				append presetsEnvironment environment_values
 				)
-			)	
-
-		for i in presetsEnvironment do print i
-		--print presetsName
-		--print presetsFrame
-		--print presetsEnvironment
+			)
 		)
-		
+
 	on ddlPresets MouseClick arg do (
 		ddlPresets.text = ""
 		ddlPresets.ForeColor = ( dotNetClass "System.Drawing.Color" ).fromARGB ( fgCol.r + 30 ) ( fgCol.g + 30 ) ( fgCol.b + 30 )
@@ -238,9 +236,7 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 	on ddlPresets lostFocus arg do (
 		if ddlPresets.text == "" AND presetsName.count == 0 then ( 
 			comboText()
-			) else if presetsName.count > 0 AND ddlPresets.SelectedIndex == -1 AND ddlPresets.text == "" then (
-				comboText()
-				)
+			) else if presetsName.count > 0 AND ddlPresets.SelectedIndex == -1 AND ddlPresets.text == "" then ( comboText() )
 		)
 		
 	on btnSet pressed do (
@@ -265,7 +261,6 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 		fx = #()
 		fxS = #()
 		effects = #()
-		presetsEnvironment = #()
 		
 		matsInScene = for mIS in scenematerials collect mIS
 		meditMats = for mM in meditmaterials collect mM
@@ -286,9 +281,7 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 					ddlPresets.ForeColor = ( dotNetClass "System.Drawing.Color" ).fromARGB ( fgCol.r + 30 ) ( fgCol.g + 30 ) ( fgCol.b + 30 )
 					ddlPresets.SelectedIndex = ddlPresets.items.count - 1
 					)
-			) else (
-				messagebox "Please add a preset name first!" title:"Render Preseter"
-				)
+			) else ( messagebox "Please add a preset name first!" title:"Render Preseter" )
 				
 		if renderSceneDialog.isOpen() then rendDiag = "open" else rendDiag = "closed"
 		if rendDiag == "open" do renderSceneDialog.close()
@@ -335,9 +328,7 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 						
 						join engSet #( setVal = #( rS, classof prp, prp.name ) )	
 						matIsInScene = "n"	
-						) else (
-							join engSet #( setVal = #( rS, undefined ) )
-							)
+						) else ( join engSet #( setVal = #( rS, undefined ) ) )
 					)
 					
 				#Camera_Output_Shader: (
@@ -353,9 +344,7 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 						
 						join engSet #( setVal = #( rS, classof prp, prp.name ) )	
 						matIsInScene = "n"		
-						) else (
-							join engSet #( setVal = #( rS, undefined ) )
-							)
+						) else ( join engSet #( setVal = #( rS, undefined ) ) )
 					)
 				
 				#Camera_Volume_Shader: (
@@ -372,9 +361,7 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 						
 						join engSet #( setVal = #( rS, classof prp, prp.name ) )	
 						matIsInScene = "n"		
-						) else (
-							join engSet #( setVal = #( rS, undefined ) )
-							)
+						) else ( join engSet #( setVal = #( rS, undefined ) ) )
 					)
 
 				#Override_Material: (
@@ -391,9 +378,7 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 							
 						join engSet #( setVal = #( rS, classof prp, prp.name ) )	
 						matIsInScene = "n"
-						) else (
-							join engSet #( setVal = #( rS, undefined ) )
-							)
+						) else ( join engSet #( setVal = #( rS, undefined ) ) )
 					)
 					
 				#options_overrideMtl_mtl: (
@@ -410,9 +395,7 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 							
 						join engSet #( setVal = #( rS, classof prp, prp.name ) )	
 						matIsInScene = "n"
-						) else (
-							join engSet #( setVal = #( rS, undefined ) )
-							)
+						) else ( join engSet #( setVal = #( rS, undefined ) ) )
 					)
 					
 				#V_Ray_settings:(
@@ -424,9 +407,7 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 						join engSet #( setVal = #( rS, classof prp, prp.name ) )
 						) else if classof prp == string then (
 							join engSet #( setVal = #( rS, replaceString prp ) )
-							) else (						
-								join engSet #( setVal = #( rS, prp ) )
-								)
+							) else ( join engSet #( setVal = #( rS, prp ) ) )
 					)
 				
 				)
@@ -447,9 +428,7 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 			
 			if classof rElement[r][2] == string then (
 				join rElementS #( rElementN = #( replaceString rElement[r][2] ) )
-				) else (
-					join rElementS #( rElementN = #( rElement[r][2] ) )
-					)
+				) else ( join rElementS #( rElementN = #( rElement[r][2] ) ) )
 			
 			propNames = getPropNames rElement[r][1]
 			
@@ -472,34 +451,39 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 						join rElementS #( rElementN = #( p, classof ele, ele.name ) )
 						) else if classof ele == string then (
 							join rElementS #( rElementN = #( p, replaceString ele ) )
-							) else (
-								join rElementS #( rElementN = #( p, ele ) )
-								)
+							) else ( join rElementS #( rElementN = #( p, ele ) ) )
 				)
 			append rElementA rElementS
 			)
 		append presetsElement rElementA
 			
 		-- presetsEnvironment	
-		envSet = #( backgroundColor, useEnvironmentMap, lightTintColor, lightLevel, ambientColor, if environmentMap != undefined then ( classof environmentMap ) else undefined, if environmentMap != undefined do environmentMap.name )
+		envSet = #( backgroundColor, useEnvironmentMap, lightTintColor, lightLevel, ambientColor )
+		
+		if environmentMap != undefined then ( 
+			messagebox ( "You use a map in your environment, make sure that you have this in your material editor before you save a new preset!" ) title:"Render Preseter"
+			join envSet #( classof environmentMap, environmentMap.name )
+			) else ( join envSet #( environmentMap ) )
 
 		-- get exposure
 		expo = SceneExposureControl.exposureControl
-		if expo != undefined do (
+		exposure = #()
+		if expo != undefined then (
 			exposS = #()
-			exposure = #()
 			
 			join exposure #( classof expo )
 
 			expS = GetPropNames expo
 			for exS in expS do (
 				exSprop = getproperty expo exS
-				
-				if superclassof exSprop != RenderElement AND exS != #shader_mode AND exS != #gammaOnOff AND exS != #gamma AND exS != #WhitePoint do (
-					join exposure #( exposS = #( exS, exSprop ) )
+
+				if superclassof exSprop != RenderElement AND exS != #shader_mode AND exS != #gammaOnOff AND exS != #gamma AND exS != #WhitePoint AND exS != #film_iso AND exS != #cm2_factor do (
+					if superclassof exSprop == camera then (
+						join exposure #( exposS = #( exS, classof exSprop, exSprop.name ) )
+						) else ( join exposure #( exposS = #( exS, exSprop ) ) )
 					)
 				)
-			)
+			) else join exposure #( undefined )
 
 		-- get atmospherics
 		for a = 1 to numAtmospherics do (
@@ -520,6 +504,9 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 			join fx #( getEffect b )
 			)
 			
+		if fx.count > 0 do 
+			messagebox ( "You use effects in your environment, only the active/deactive state will save. Don't delete the effects!" ) title:"Render Preseter"
+		
 		for x in 1 to fx.count do (
 			fxS = #()
 			join fxS #( classof fx[x], isActive ( getEffect x ) )
@@ -528,10 +515,10 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 			
 		-- merge presetsEnvironment and effects
 		envAndFx = #( envSet, exposure, atmospherics, effects )
-		append presetsEnvironment envAndFx	
-			
-		setPresets ddlPresets.text presetsFra engSet rElementA envAndFx presetsName.count
+		append presetsEnvironment envAndFx
 
+		setPresets ddlPresets.text presetsFra engSet rElementA envAndFx presetsName.count
+		
 		if rendDiag == "open" do (
 			renderSceneDialog.commit()
 			renderSceneDialog.open()
@@ -663,9 +650,7 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 											cR.Override_Material = mA
 											)
 										)
-									) else (
-										try ( setProperty cR pEV[1] pEV[2] ) catch ()
-										)
+									) else ( try ( setProperty cR pEV[1] pEV[2] ) catch () )
 								)
 							)
 						)
@@ -694,9 +679,7 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 										for mA in matsInScene do (
 											if classof mA == presetsElement[sL][r+1][t][2] AND mA.name == presetsElement[sL][r+1][t][3] then (												
 												setProperty re presetsElement[sL][r+1][t][1] mA
-												) else (
-													messagebox ( presetsElement[sL][r+1][t][3] as string + "\" is not longer in your scene, render element material can not set!" ) title:"Render Preseter"
-													)
+												) else ( messagebox ( presetsElement[sL][r+1][t][3] as string + "\" is not longer in your scene, render element material can not set!" ) title:"Render Preseter" )
 											)
 										) else if classof presetsElement[sL][r+1][t][2] == textureMap then (
 											matMap = ( GetBitmapOrMaterial matsInScene presetsElement[sL][r+1][t][2] )
@@ -704,17 +687,124 @@ rollout RenderPreseter "Render Preseter" width:150 height:25 (
 											for mA in matMap do (
 												if mA.name == presetsElement[sL][r+1][t][3] then (
 													setProperty re presetsElement[sL][r+1][t][1] mA
-													) else (
-														messagebox ( presetsElement[sL][r+1][t][3] as string + "\" is not longer in your scene, render element shader can not set!" ) title:"Render Preseter"
-														)
+													) else ( messagebox ( presetsElement[sL][r+1][t][3] as string + "\" is not longer in your scene, render element shader can not set!" ) title:"Render Preseter" )
 												)
-											) else (
-												setProperty re presetsElement[sL][r+1][t][1] presetsElement[sL][r+1][t][2]
-												)
+											) else ( setProperty re presetsElement[sL][r+1][t][1] presetsElement[sL][r+1][t][2] )
 									) 
 								) 
 							)
 						)
+
+					-- set environment
+					backgroundColor = presetsEnvironment[sL][1][1]
+					useEnvironmentMap = presetsEnvironment[sL][1][2]
+					lightTintColor = presetsEnvironment[sL][1][3]
+					lightLevel = presetsEnvironment[sL][1][4]
+					ambientColor = presetsEnvironment[sL][1][5]
+
+					if presetsEnvironment[sL][1][6] != undefined then (
+						if environmentMap != undefined then (
+							if presetsEnvironment[sL][1][6] != classof environmentMap AND presetsEnvironment[sL][1][7] != environmentMap.name do (
+								matMap = ( GetBitmapOrMaterial matsInScene presetsEnvironment[sL][1][6] )
+								matIsInScene = "n"
+								
+								for mM in matMap do (
+									if mM.name == presetsEnvironment[sL][1][7] do (
+										environmentMap = mM
+										matIsInScene = "y"
+										) 
+									)
+								if matIsInScene == "n" do (
+									messagebox ( presetsEnvironment[sL][1][7] + " is not anymore in your scene, environment map can not set." ) title:"Render Preseter"
+									)
+								matIsInScene = "n"	
+								)
+							) else (
+								matMap = ( GetBitmapOrMaterial matsInScene presetsEnvironment[sL][1][6] )
+								matIsInScene = "n"
+								
+								for mM in matMap do (
+									if mM.name == presetsEnvironment[sL][1][7] do (
+										environmentMap = mM
+										matIsInScene = "y"
+										) 
+									)
+								if matIsInScene == "n" do (
+									messagebox ( presetsEnvironment[sL][1][7] + " is not anymore in your scene, environment map can not set." ) title:"Render Preseter"
+									)
+								matIsInScene = "n"		
+								)
+							) else ( environmentMap = undefined )
+								
+					-- set exposure
+					if presetsEnvironment[sL][2][1] != undefined then (
+						if classof SceneExposureControl.exposureControl != presetsEnvironment[sL][2][1] do SceneExposureControl.exposureControl = presetsEnvironment[sL][2][1] ()
+						
+						eC = SceneExposureControl.exposureControl
+						wb = undefined
+						for i = 2 to presetsEnvironment[sL][2].count do (
+							eS = presetsEnvironment[sL][2][i]
+							case eS[1] of (
+								#camnode: (
+									for cam in ( cameras as array ) do (
+										if cam.name == eS[3] do (
+											eC.camnode = cam
+											)
+										)
+									)
+									
+								#white_balance: (
+									wb = eS[2]
+									)
+								
+								default: (
+									setProperty eC eS[1] eS[2]
+									)
+								)
+							)
+						if wb != undefined do eC.white_balance = wb
+						wb = undefined
+						) else ( SceneExposureControl.exposureControl = undefined )
+						
+					-- set atmospherics
+					if presetsEnvironment[sL][3].count > 0 then (
+						newAtmo = #()
+						for a = 1 to numAtmospherics do (
+							join newAtmo #( getAtmospheric a )	
+							)
+						
+						if newAtmo.count == presetsEnvironment[sL][3].count then (
+							for b = 1 to presetsEnvironment[sL][3].count do (
+								if classof newAtmo[b] == presetsEnvironment[sL][3][b][1] do (
+									setActive newAtmo[b] presetsEnvironment[sL][3][b][2]
+									) 
+								)
+							) else ( messagebox "You have not the same amount of atmospherics in your environment. No preset will set!" title:"Render Preseter" )
+						) else (
+							for a = 1 to numAtmospherics do (
+								setActive ( getAtmospheric a ) false
+								)
+							)
+					
+					-- set effects
+					if presetsEnvironment[sL][4].count > 0 then (
+						newFX = #()
+						for f = 1 to numeffects do (
+							join newFX #( getEffect f )	
+							)
+						
+						if newAtmo.count == presetsEnvironment[sL][4].count then (
+							for g = 1 to presetsEnvironment[sL][4].count do (
+								if classof newFX[g] == presetsEnvironment[sL][4][g][1] do (
+									setActive newFX[g] presetsEnvironment[sL][4][g][2]
+									) 
+								)
+							) else ( messagebox "You have not the same amount of effects in your environment. No preset will set!" title:"Render Preseter" )
+						) else (
+							for f = 1 to numeffects do (
+								setActive ( getEffect f ) false
+								)
+							)
 						
 					if rendDiag == "open" do (
 						renderSceneDialog.commit()
