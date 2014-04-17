@@ -43,7 +43,7 @@
 
 ----------------------------------------------------------------------------------------------------------------------
 --
---  Script Name: Search Materials And Maps
+--  Script Name: Render Preseter
 --
 --	Author:   Jonathan Baecker (jb_alvardo) www.animations-and-more.com | www.pixelcrusher.de | blog.pixelcrusher.de
 --
@@ -55,6 +55,7 @@ TODO:
 - better map check
 - check if environment or other shader are already in the right slot
 - load script in toolbar
+- save and load camera
 
 */
 (
